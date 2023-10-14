@@ -1,33 +1,28 @@
-import prismadb from "@/lib/prismadb";
+import { db } from "@/db";
+import { orders } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 interface GraphData {
   name: string;
   total: number;
 }
 
-export const getGraphRevenue = async (
-  storeId: string
-): Promise<GraphData[]> => {
-  const paidOrders = await prismadb.orders.findMany({
-    where: {
-      stripePaymentIntentStatus: "succeeded",
-    },
+export const getGraphRevenue = async (): Promise<GraphData[]> => {
+  const paidOrders = await db.query.orders.findMany({
+    where: eq(orders.stripePaymentIntentStatus, "succeeded"),
   });
 
   const monthlyRevenue: { [key: number]: number } = {};
 
   // Grouping the orders by month and summing the revenue
-  // for (const order of paidOrders) {
-  //   const month = order.createdAt.getMonth(); // 0 for Jan, 1 for Feb, ...
-  //   let revenueForOrder = 0;
-
-  //   for (const item of order.orderItems) {
-  //     revenueForOrder += item.product.price.toNumber();
-  //   }
-
-  //   // Adding the revenue for this order to the respective month
-  //   monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenueForOrder;
-  // }
+  for (const order of paidOrders) {
+    // Adding the revenue for this order to the respective month
+    if (order.createdAt) {
+      const month = order.createdAt.getMonth(); // 0 for Jan, 1 for Feb, ...
+      monthlyRevenue[month] =
+        (monthlyRevenue[month] || 0) + Number(order.amount);
+    }
+  }
 
   // Converting the grouped data into the format expected by the graph
   const graphData: GraphData[] = [

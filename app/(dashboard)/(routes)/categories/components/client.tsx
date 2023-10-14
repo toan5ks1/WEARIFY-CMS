@@ -16,17 +16,17 @@ interface CategoriesClientProps {
   data: CategoryColumn[];
 }
 
-export const CategoriesClient: React.FC<CategoriesClientProps> = ({
-  data
-}) => {
-  const params = useParams();
+export const CategoriesClient: React.FC<CategoriesClientProps> = ({ data }) => {
   const router = useRouter();
 
   return (
     <>
       <div className="flex items-center justify-between">
-        <Heading title={`Categories (${data.length})`} description="Manage categories for your store" />
-        <Button onClick={() => router.push(`/${params.storeId}/categories/new`)}>
+        <Heading
+          title={`Categories (${data.length})`}
+          description="Manage categories for your store"
+        />
+        <Button onClick={() => router.push("/categories/new")}>
           <Plus className="mr-2 h-4 w-4" /> Add New
         </Button>
       </div>

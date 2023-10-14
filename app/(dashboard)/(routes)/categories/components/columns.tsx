@@ -3,24 +3,34 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { CellAction } from "./cell-action";
+import { Badge } from "@/components/ui/badge";
 
 export type CategoryColumn = {
-  id: bigint;
+  id: number;
   title: string;
   image: string;
   icon: string;
+  subcategory: Array<{ title: string }>;
   createdAt: string;
 };
 
 export const columns: ColumnDef<CategoryColumn>[] = [
   {
-    accessorKey: "name",
+    accessorKey: "title",
     header: "Name",
   },
   {
-    accessorKey: "billboard",
-    header: "Billboard",
-    cell: ({ row }) => row.original.image,
+    accessorKey: "image",
+    header: "Image",
+    // cell: ({ row }) => row.original.image,
+  },
+  {
+    accessorKey: "subcategory",
+    header: "Sub category",
+    cell: ({ row }) =>
+      row.original.subcategory.map((sub) => (
+        <Badge key={sub.title}>{sub.title}</Badge>
+      )),
   },
   {
     accessorKey: "createdAt",

@@ -13,11 +13,7 @@ const Navbar = async () => {
     redirect("/sign-in");
   }
 
-  const stores = await prismadb.stores.findMany({
-    // where: {
-    //   userId,
-    // }
-  });
+  const stores = await prismadb.stores.findMany();
 
   return (
     <div className="border-b">

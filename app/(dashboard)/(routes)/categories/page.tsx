@@ -1,20 +1,27 @@
 import { format } from "date-fns";
 
-import prismadb from "@/lib/prismadb";
-
 import { CategoryColumn } from "./components/columns";
 import { CategoriesClient } from "./components/client";
+import { db } from "@/db";
+import { desc } from "drizzle-orm";
+import { category } from "@/db/schema";
 
-const CategoriesPage = async ({ params }: { params: { storeId: string } }) => {
-  const categories = await prismadb.category.findMany({
-    orderBy: {
-      createdAt: "desc",
+const CategoriesPage = async () => {
+  const categories = await db.query.category.findMany({
+    orderBy: [desc(category.createdAt)],
+    with: {
+      subcategory: {
+        columns: {
+          title: true,
+        },
+      },
     },
   });
 
   const formattedCategories: CategoryColumn[] = categories.map((item) => ({
     id: item.id,
     title: item.title,
+    subcategory: item.subcategory,
     image: "billboard",
     icon: "billboard",
     createdAt: format(item.createdAt!, "MMMM do, yyyy"),

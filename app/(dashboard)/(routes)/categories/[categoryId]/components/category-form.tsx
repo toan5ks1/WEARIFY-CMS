@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { Trash } from "lucide-react";
-import { Billboard, Category } from "@prisma/client";
 import { useParams, useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
@@ -30,22 +29,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Category, Subcategory } from "@/db/schema";
 
 const formSchema = z.object({
-  name: z.string().min(2),
-  billboardId: z.string().min(1),
+  title: z.string().min(2),
+  subcategory: z.string().min(2),
 });
 
 type CategoryFormValues = z.infer<typeof formSchema>;
 
 interface CategoryFormProps {
-  initialData: Category | null;
-  // billboards: Billboard[];
+  initialData: Category | undefined;
+  subcategory: Subcategory[] | undefined;
 }
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({
   initialData,
-  // billboards
+  subcategory,
 }) => {
   const params = useParams();
   const router = useRouter();
@@ -61,8 +61,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      name: "",
-      billboardId: "",
+      title: "",
     },
   });
 
@@ -136,7 +135,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
           <div className="md:grid md:grid-cols-3 gap-8">
             <FormField
               control={form.control}
-              name="name"
+              name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
@@ -153,10 +152,10 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
             />
             <FormField
               control={form.control}
-              name="billboardId"
+              name="subcategory"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Billboard</FormLabel>
+                  <FormLabel>Subcategory</FormLabel>
                   <Select
                     disabled={loading}
                     onValueChange={field.onChange}

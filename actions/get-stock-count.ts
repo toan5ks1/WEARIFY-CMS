@@ -1,11 +1,11 @@
-import prismadb from "@/lib/prismadb";
+import { db } from "@/db";
+import { products } from "@/db/schema";
+import { sql } from "drizzle-orm";
 
-export const getStockCount = async (storeId: string) => {
-  const stockCount = await prismadb.products.count({
-    where: {
-      storeId: parseInt(storeId),
-    },
-  });
+export const getStockCount = async () => {
+  const stockCount = await db
+    .select({ count: sql<number>`cast(count(*) as UNSIGNED)` })
+    .from(products);
 
-  return stockCount;
+  return stockCount[0].count;
 };
