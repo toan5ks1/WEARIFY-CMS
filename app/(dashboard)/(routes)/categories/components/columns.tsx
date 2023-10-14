@@ -8,8 +8,6 @@ import { Badge } from "@/components/ui/badge";
 export type CategoryColumn = {
   id: number;
   title: string;
-  image: string;
-  icon: string;
   subcategory: Array<{ title: string }>;
   createdAt: string;
 };
@@ -18,11 +16,6 @@ export const columns: ColumnDef<CategoryColumn>[] = [
   {
     accessorKey: "title",
     header: "Name",
-  },
-  {
-    accessorKey: "image",
-    header: "Image",
-    // cell: ({ row }) => row.original.image,
   },
   {
     accessorKey: "subcategory",

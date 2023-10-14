@@ -25,7 +25,7 @@ export async function addCategoryAction(input: z.infer<typeof categorySchema>) {
   revalidatePath("/categories");
 }
 
-export async function updateCategory1Action(
+export async function updateCategoryAction(
   input: z.infer<typeof categorySchema> & {
     id: number;
   }

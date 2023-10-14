@@ -1,10 +1,10 @@
-import { format } from "date-fns";
+import { db } from "@/db"
+import { categories } from "@/db/schema"
+import { format } from "date-fns"
+import { desc } from "drizzle-orm"
 
-import { CategoryColumn } from "./components/columns";
-import { CategoriesClient } from "./components/client";
-import { db } from "@/db";
-import { desc } from "drizzle-orm";
-import { categories } from "@/db/schema";
+import { CategoriesClient } from "./components/client"
+import { CategoryColumn } from "./components/columns"
 
 const CategoriesPage = async () => {
   const allCategories = await db.query.categories.findMany({
@@ -16,16 +16,14 @@ const CategoriesPage = async () => {
         },
       },
     },
-  });
+  })
 
   const formattedCategories: CategoryColumn[] = allCategories.map((item) => ({
     id: item.id,
     title: item.title,
     subcategory: item.subcategories,
-    image: "billboard",
-    icon: "billboard",
     createdAt: format(item.createdAt!, "MMMM do, yyyy"),
-  }));
+  }))
 
   return (
     <div className="flex-col">
@@ -33,7 +31,7 @@ const CategoriesPage = async () => {
         <CategoriesClient data={formattedCategories} />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CategoriesPage;
+export default CategoriesPage
