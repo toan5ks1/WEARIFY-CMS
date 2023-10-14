@@ -1,6 +1,6 @@
 "use client"
 
-import { Category } from "@/db/schema"
+import { Subcategory } from "@/db/schema"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 
@@ -8,22 +8,26 @@ import { Badge } from "@/components/ui/badge"
 
 import { CellAction } from "./cell-action"
 
-export type CategoryColumn = Category & {
-  subcategories: {
+export type SubcategoryColumn = Omit<Subcategory, "image"> & {
+  side: {
     title: string
   }[]
 }
 
-export const columns: ColumnDef<CategoryColumn>[] = [
+export const columns: ColumnDef<SubcategoryColumn>[] = [
   {
     accessorKey: "title",
     header: "Name",
   },
   {
-    accessorKey: "subcategory",
-    header: "Sub category",
+    accessorKey: "description",
+    header: "Description",
+  },
+  {
+    accessorKey: "side",
+    header: "Print side",
     cell: ({ row }) =>
-      row.original.subcategories.map((sub) => (
+      row.original.side.map((sub) => (
         <Badge key={sub.title}>{sub.title}</Badge>
       )),
   },

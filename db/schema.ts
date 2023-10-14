@@ -84,6 +84,13 @@ export const side = mysqlTable("side", {
   createdAt: timestamp("createdAt").defaultNow(),
 })
 
+export const sideRelations = relations(side, ({ one }) => ({
+  subcategory: one(subcategories, {
+    fields: [side.subcategoryId],
+    references: [subcategories.id],
+  }),
+}))
+
 export const products = mysqlTable("products", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
