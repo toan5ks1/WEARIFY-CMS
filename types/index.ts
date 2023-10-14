@@ -4,6 +4,7 @@ import {
   type checkoutItemSchema,
 } from "@/lib/validations/cart";
 import type Stripe from "stripe";
+import { type FileWithPath } from "react-dropzone";
 import { z } from "zod";
 
 export interface Option {
@@ -72,3 +73,7 @@ export interface UserSubscriptionPlan extends SubscriptionPlan {
   isCanceled: boolean;
   isActive: boolean;
 }
+
+export type FileWithPreview = FileWithPath & {
+  preview: string;
+};

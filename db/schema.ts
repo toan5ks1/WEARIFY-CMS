@@ -32,49 +32,60 @@ export const storesRelations = relations(stores, ({ many }) => ({
   payments: many(payments),
 }));
 
-export const category = mysqlTable("category", {
-  id: serial("id").primaryKey(),
-  title: varchar("title", { length: 191 }).notNull(),
-  createdAt: timestamp("createdAt").defaultNow(),
-  image: json("images").$type<StoredFile[] | null>().default(null),
-  icon: varchar("icon", { length: 191 }),
-});
-
-export type Category = typeof category.$inferSelect;
-
-export const categoryRelations = relations(category, ({ many }) => ({
-  subcategory: many(subcategory),
-}));
-
-export const subcategory = mysqlTable("sub_category", {
+export const categories = mysqlTable("category", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 191 }).notNull(),
   description: text("description"),
-  image: json("images").$type<StoredFile[] | null>().default(null),
+  createdAt: timestamp("createdAt").defaultNow(),
+});
+
+export type Category = typeof categories.$inferSelect;
+
+export const categoryRelations = relations(categories, ({ many }) => ({
+  subcategories: many(subcategories),
+}));
+
+export const subcategories = mysqlTable("sub_category", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 191 }).notNull(),
+  description: text("description"),
+  image: json("image").$type<StoredFile | null>().default(null),
   slug: varchar("slug", { length: 191 }),
-  icon: varchar("icon", { length: 191 }),
   categoryId: int("categoryId").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
 });
 
-export type Subcategory = typeof subcategory.$inferSelect;
+export type Subcategory = typeof subcategories.$inferSelect;
 
-export const subcategoryRelations = relations(subcategory, ({ one, many }) => ({
-  category: one(category, {
-    fields: [subcategory.categoryId],
-    references: [category.id],
-  }),
-  products: many(products),
-  size: many(size),
-}));
+export const subcategoriesRelations = relations(
+  subcategories,
+  ({ one, many }) => ({
+    category: one(categories, {
+      fields: [subcategories.categoryId],
+      references: [categories.id],
+    }),
+    products: many(products),
+    size: many(size),
+    side: many(side),
+  })
+);
+
+export const side = mysqlTable("side", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 191 }).notNull(),
+  description: text("description"),
+  image: json("image").$type<StoredFile | null>().default(null),
+  printArea: json("printArea").$type<StoredFile | null>().default(null),
+  subcategoryId: int("subcategoryId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
+});
 
 export const products = mysqlTable("products", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   description: text("description"),
   images: json("images").$type<StoredFile[] | null>().default(null),
-  category: varchar("category", { length: 191 }).notNull(),
-  subcategory: varchar("subcategory", { length: 191 }).notNull(),
+  subcategoryId: int("subcategoryId").notNull(),
   price: decimal("price", { precision: 10, scale: 2 }).notNull().default("0"),
   inventory: int("inventory").notNull().default(0),
   rating: int("rating").notNull().default(0),
@@ -89,13 +100,9 @@ export type NewProduct = typeof products.$inferInsert;
 
 export const productsRelations = relations(products, ({ one, many }) => ({
   store: one(stores, { fields: [products.storeId], references: [stores.id] }),
-  category: one(category, {
-    fields: [products.category],
-    references: [category.title],
-  }),
-  subcategory: one(subcategory, {
-    fields: [products.subcategory],
-    references: [subcategory.title],
+  subcategory: one(subcategories, {
+    fields: [products.subcategoryId],
+    references: [subcategories.id],
   }),
   size: many(size),
   color: many(color),
@@ -110,11 +117,6 @@ export const size = mysqlTable("size", {
 
 export type Size = typeof size.$inferSelect;
 
-export const sizeRelations = relations(size, ({ many }) => ({
-  products: many(products),
-  subcategory: many(subcategory),
-}));
-
 export const color = mysqlTable("color", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
@@ -123,10 +125,6 @@ export const color = mysqlTable("color", {
 });
 
 export type Color = typeof color.$inferSelect;
-
-export const colorRelations = relations(color, ({ many }) => ({
-  products: many(products),
-}));
 
 // Original source: https://github.com/jackblatch/OneStopShop/blob/main/db/schema.ts
 export const carts = mysqlTable("carts", {

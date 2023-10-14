@@ -4,13 +4,13 @@ import { CategoryColumn } from "./components/columns";
 import { CategoriesClient } from "./components/client";
 import { db } from "@/db";
 import { desc } from "drizzle-orm";
-import { category } from "@/db/schema";
+import { categories } from "@/db/schema";
 
 const CategoriesPage = async () => {
-  const categories = await db.query.category.findMany({
-    orderBy: [desc(category.createdAt)],
+  const allCategories = await db.query.categories.findMany({
+    orderBy: [desc(categories.createdAt)],
     with: {
-      subcategory: {
+      subcategories: {
         columns: {
           title: true,
         },
@@ -18,10 +18,10 @@ const CategoriesPage = async () => {
     },
   });
 
-  const formattedCategories: CategoryColumn[] = categories.map((item) => ({
+  const formattedCategories: CategoryColumn[] = allCategories.map((item) => ({
     id: item.id,
     title: item.title,
-    subcategory: item.subcategory,
+    subcategory: item.subcategories,
     image: "billboard",
     icon: "billboard",
     createdAt: format(item.createdAt!, "MMMM do, yyyy"),
