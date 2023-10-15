@@ -4,10 +4,10 @@ import { Separator } from "@/components/ui/separator";
 import { Overview } from "@/components/overview";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
-import { getTotalRevenue } from "@/actions/get-total-revenue";
-import { getSalesCount } from "@/actions/get-sales-count";
-import { getGraphRevenue } from "@/actions/get-graph-revenue";
-import { getStockCount } from "@/actions/get-stock-count";
+import { getTotalRevenue } from "@/app/_actions/overview/get-total-revenue";
+import { getSalesCount } from "@/app/_actions/overview/get-sales-count";
+import { getGraphRevenue } from "@/app/_actions/overview/get-graph-revenue";
+import { getStockCount } from "@/app/_actions/overview/get-stock-count";
 import { formatter } from "@/lib/utils";
 
 const DashboardPage: React.FC = async () => {

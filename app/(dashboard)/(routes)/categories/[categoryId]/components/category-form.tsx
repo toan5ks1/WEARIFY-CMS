@@ -21,29 +21,38 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Icons } from "@/components/icons"
-import { addCategoryAction } from "@/app/_actions/category"
+import { updateCategoryAction } from "@/app/_actions/category"
+import { Category } from "@/db/schema"
+import { Heading } from "@/components/ui/heading"
+import { Separator } from "@/components/ui/separator"
 
-type Inputs = z.infer<typeof categorySchema>
+type Inputs = z.infer<typeof categorySchema> & {
+  id: number
+}
 
-export function UpdateCategoryForm() {
+interface CategoryClientProps {
+  category: Category
+}
+
+export function UpdateCategoryForm({category}: CategoryClientProps) {
   const router = useRouter()
   const [isPending, startTransition] = React.useTransition()
 
   const form = useForm<Inputs>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      title: "",
-      description: "",
-    },
+      title: category.title,
+      description: category?.description ?? undefined
+    }
   })
 
   function onSubmit(data: Inputs) {
     startTransition(async () => {
       try {
-        await addCategoryAction({ ...data })
+        await updateCategoryAction({ ...data, id: category.id })
 
         form.reset()
-        toast.success("Category added successfully.")
+        toast.success("Category updated successfully.")
         router.push("/categories")
         router.refresh() // Workaround for the inconsistency of cache revalidation
       } catch (err) {
@@ -53,51 +62,58 @@ export function UpdateCategoryForm() {
   }
 
   return (
-    <Form {...form}>
-      <form
-        className="grid w-full max-w-2xl gap-5"
-        onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
-      >
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Type category name here." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Type category description here."
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button className="w-fit" disabled={isPending}>
-          {isPending && (
-            <Icons.spinner
-              className="mr-2 h-4 w-4 animate-spin"
-              aria-hidden="true"
-            />
-          )}
-          Add Category
-          <span className="sr-only">Add Category</span>
-        </Button>
-      </form>
-    </Form>
+    <div className="flex flex-col justify-between gap-4">
+      <Heading
+        title={"Update category"}
+        description="Update this category information"
+      />
+      <Separator />
+      <Form {...form}>
+        <form
+          className="grid w-full max-w-2xl gap-5"
+          onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
+        >
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Type category name here." {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Type category description here."
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button className="w-fit" disabled={isPending}>
+            {isPending && (
+              <Icons.spinner
+                className="mr-2 h-4 w-4 animate-spin"
+                aria-hidden="true"
+              />
+              )}
+              Update Category
+              <span className="sr-only">Update Category</span>
+          </Button>
+        </form>        
+      </Form>
+    </div>
   )
 }
