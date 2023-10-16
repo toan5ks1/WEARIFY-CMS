@@ -1,4 +1,4 @@
-import type { CartItem, CheckoutItem, StoredFile } from "@/types"
+import type { CartItem, CheckoutItem, PrintArea, StoredFile } from "@/types"
 import { relations } from "drizzle-orm"
 import {
   boolean,
@@ -49,7 +49,7 @@ export const subcategories = mysqlTable("sub_category", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 191 }).notNull(),
   description: text("description"),
-  image: json("image").$type<StoredFile | null>().default(null),
+  images: json("image").$type<StoredFile | null>().default(null),
   slug: varchar("slug", { length: 191 }),
   categoryId: int("categoryId").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
@@ -65,29 +65,31 @@ export const subcategoriesRelations = relations(
       references: [categories.id],
     }),
     products: many(products),
-    size: many(size),
-    side: many(side),
+    sides: many(sides),
   })
 )
 
-export const side = mysqlTable("side", {
+export const sides = mysqlTable("sides", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 191 }).notNull(),
   description: text("description"),
   image: json("image").$type<StoredFile | null>().default(null),
-  printArea: json("printArea").$type<StoredFile | null>().default(null),
-  defaultImage: json("defaultImage").$type<StoredFile | null>().default(null),
-  defaultPrintArea: json("defaultPrintArea")
-    .$type<StoredFile | null>()
+  printArea: json("printArea")
+    .$type<StoredFile | PrintArea | null>()
     .default(null),
   subcategoryId: int("subcategoryId").notNull(),
+  productId: int("productId"),
   createdAt: timestamp("createdAt").defaultNow(),
 })
 
-export const sideRelations = relations(side, ({ one }) => ({
+export const sideRelations = relations(sides, ({ one }) => ({
   subcategory: one(subcategories, {
-    fields: [side.subcategoryId],
+    fields: [sides.subcategoryId],
     references: [subcategories.id],
+  }),
+  product: one(products, {
+    fields: [sides.productId],
+    references: [products.id],
   }),
 }))
 
@@ -115,27 +117,27 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.subcategoryId],
     references: [subcategories.id],
   }),
-  size: many(size),
-  color: many(color),
+  sizes: many(sizes),
+  colors: many(colors),
 }))
 
-export const size = mysqlTable("size", {
+export const sizes = mysqlTable("sizes", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   value: varchar("value", { length: 191 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
 })
 
-export type Size = typeof size.$inferSelect
+export type Size = typeof sizes.$inferSelect
 
-export const color = mysqlTable("color", {
+export const colors = mysqlTable("colors", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 191 }).notNull(),
   value: varchar("value", { length: 191 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
 })
 
-export type Color = typeof color.$inferSelect
+export type Color = typeof colors.$inferSelect
 
 // Original source: https://github.com/jackblatch/OneStopShop/blob/main/db/schema.ts
 export const carts = mysqlTable("carts", {

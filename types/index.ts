@@ -65,3 +65,10 @@ export interface UserSubscriptionPlan extends SubscriptionPlan {
 export type FileWithPreview = FileWithPath & {
   preview: string
 }
+
+export interface PrintArea {
+  w: number
+  h: number
+  x: number
+  y: number
+}

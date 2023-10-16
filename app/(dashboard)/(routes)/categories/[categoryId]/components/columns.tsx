@@ -8,8 +8,8 @@ import { Badge } from "@/components/ui/badge"
 
 import { CellAction } from "./cell-action"
 
-export type SubcategoryColumn = Omit<Subcategory, "image"> & {
-  side: {
+export type SubcategoryColumn = Omit<Subcategory, "images"> & {
+  sides: {
     title: string
   }[]
 }
@@ -27,8 +27,8 @@ export const columns: ColumnDef<SubcategoryColumn>[] = [
     accessorKey: "side",
     header: "Print side",
     cell: ({ row }) =>
-      row.original.side.map((sub) => (
-        <Badge key={sub.title}>{sub.title}</Badge>
+      row.original.sides.map((side) => (
+        <Badge key={side.title}>{side.title}</Badge>
       )),
   },
   {

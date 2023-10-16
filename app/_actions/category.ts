@@ -34,8 +34,6 @@ export async function updateCategoryAction(
     where: or(eq(categories.id, input.id), eq(categories.title, input.title)),
   });
 
-  console.log(input.id)
-
   let msg;
   switch(category.length){
     case 0:
@@ -47,13 +45,10 @@ export async function updateCategoryAction(
       }
       break;
     case 2:
-      msg = "Store name already taken"
+      msg = "Category name already taken"
       break;
     default:
       break;
-  }
-  if (!category) {
-    throw new Error();
   }
 
   if (msg) {
@@ -65,26 +60,30 @@ export async function updateCategoryAction(
   revalidatePath("/categories");
 }
 
-// async function deleteStore() {
-//   "use server"
+export async function deleteCategoryAction({id}: {id: number}) {
+  const category = await db.query.categories.findFirst({
+    where: eq(categories.id, id),
+    columns: {
+      id: true,
+    },
+    with: {
+      subcategories: {
+        columns: {
+          id: true,
+        },
+      }
+    }
+  })
 
-//   const store = await db.query.stores.findFirst({
-//     where: eq(stores.id, storeId),
-//     columns: {
-//       id: true,
-//     },
-//   })
+  if (!category) {
+    throw new Error("Store not found")
+  }
 
-//   if (!store) {
-//     throw new Error("Store not found")
-//   }
+  if (category.subcategories.length) {
+    throw new Error("Make sure you removed all subcategory using this category first")
+  }
 
-//   await db.delete(stores).where(eq(stores.id, storeId))
+  await db.delete(categories).where(eq(categories.id, id))
 
-//   // Delete all products of this store
-//   await db.delete(products).where(eq(products.storeId, storeId))
-
-//   const path = "/dashboard/stores"
-//   revalidatePath(path)
-//   redirect(path)
-// }
+  revalidatePath("/categories")
+}
