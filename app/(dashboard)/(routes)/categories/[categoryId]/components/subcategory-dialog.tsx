@@ -32,6 +32,7 @@ import {
   UncontrolledFormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
@@ -84,172 +85,174 @@ export function AddSubcategoryDialog() {
           <Plus className="mr-2 h-4 w-4" /> Add New
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Add subcategory</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form
-            className="grid w-full max-w-2xl gap-5"
-            onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
-          >
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Type subcategory name here."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Type subcategory description here."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormItem className="flex w-full flex-col gap-1.5">
-              <FormLabel>Images</FormLabel>
-              {files?.length ? (
-                <div className="flex items-center gap-2">
-                  {files.map((file, i) => (
-                    <Zoom key={i}>
-                      <Image
-                        src={file.preview}
-                        alt={file.name}
-                        className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
-                        width={80}
-                        height={80}
+      <DialogContent className="max-w-2xl lg:h-[80dvh] lg:overflow-hidden">
+        <ScrollArea className="h-full">
+          <DialogHeader>
+            <DialogTitle>Add subcategory</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form
+              className="grid w-full max-w-2xl gap-5 pr-6"
+              onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
+            >
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Type subcategory name here."
+                        {...field}
                       />
-                    </Zoom>
-                  ))}
-                </div>
-              ) : null}
-              <FormControl>
-                <FileDialog
-                  setValue={form.setValue}
-                  name="images"
-                  maxFiles={1}
-                  maxSize={1024 * 1024 * 4}
-                  files={files}
-                  setFiles={setFiles}
-                  isUploading={isUploading}
-                  disabled={isPending}
-                />
-              </FormControl>
-              <UncontrolledFormMessage
-                message={form.formState.errors.images?.message}
-              />
-            </FormItem>
-            <DialogTitle>Print sides</DialogTitle>
-            <div>
-              {fields.map((field, index) => (
-                <>
-                  <FormField
-                    control={form.control}
-                    key={field.id}
-                    name={`sides.${index}.title`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className={cn(index !== 0 && "sr-only")}>
-                          Name
-                        </FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex flex-col items-start gap-6 sm:flex-row">
-                    <FormField
-                      control={form.control}
-                      key={field.id}
-                      name={`sides.${index}.image`}
-                      render={({ field }) => (
-                        <FormItem className="grid w-full">
-                          <FormLabel>Mockup</FormLabel>
-                          <FormControl>
-                            <FileDialog
-                              setValue={form.setValue}
-                              maxFiles={1}
-                              maxSize={1024 * 1024 * 4}
-                              files={files}
-                              setFiles={setFiles}
-                              isUploading={isUploading}
-                              disabled={isPending}
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      key={field.id}
-                      name={`sides.${index}.printArea`}
-                      render={({ field }) => (
-                        <FormItem className="grid w-full">
-                          <FormLabel>Print area</FormLabel>
-                          <FormControl>
-                            <FileDialog
-                              setValue={form.setValue}
-                              maxFiles={1}
-                              maxSize={1024 * 1024 * 4}
-                              files={files}
-                              setFiles={setFiles}
-                              isUploading={isUploading}
-                              disabled={isPending}
-                              {...field}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                </>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() => append({ title: "" })}
-              >
-                Add side
-              </Button>
-            </div>
-            <DialogFooter>
-              <Button className="w-fit" disabled={isPending}>
-                {isPending && (
-                  <Icons.spinner
-                    className="mr-2 h-4 w-4 animate-spin"
-                    aria-hidden="true"
-                  />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-                Add Subcategory
-                <span className="sr-only">Add Subcategory</span>
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Type subcategory description here."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormItem className="flex w-full flex-col gap-1.5">
+                <FormLabel>Images</FormLabel>
+                {files?.length ? (
+                  <div className="flex items-center gap-2">
+                    {files.map((file, i) => (
+                      <Zoom key={i}>
+                        <Image
+                          src={file.preview}
+                          alt={file.name}
+                          className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
+                          width={80}
+                          height={80}
+                        />
+                      </Zoom>
+                    ))}
+                  </div>
+                ) : null}
+                <FormControl>
+                  <FileDialog
+                    setValue={form.setValue}
+                    name="images"
+                    maxFiles={1}
+                    maxSize={1024 * 1024 * 4}
+                    files={files}
+                    setFiles={setFiles}
+                    isUploading={isUploading}
+                    disabled={isPending}
+                  />
+                </FormControl>
+                <UncontrolledFormMessage
+                  message={form.formState.errors.images?.message}
+                />
+              </FormItem>
+              <DialogTitle>Print sides</DialogTitle>
+              <div>
+                {fields.map((field, index) => (
+                  <>
+                    <FormField
+                      control={form.control}
+                      key={field.id}
+                      name={`sides.${index}.title`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className={cn(index !== 0 && "sr-only")}>
+                            Name
+                          </FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex flex-col items-start gap-6 sm:flex-row">
+                      <FormField
+                        control={form.control}
+                        key={field.id}
+                        name={`sides.${index}.image`}
+                        render={({ field }) => (
+                          <FormItem className="grid w-full">
+                            <FormLabel>Mockup</FormLabel>
+                            <FormControl>
+                              <FileDialog
+                                setValue={form.setValue}
+                                maxFiles={1}
+                                maxSize={1024 * 1024 * 4}
+                                files={files}
+                                setFiles={setFiles}
+                                isUploading={isUploading}
+                                disabled={isPending}
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        key={field.id}
+                        name={`sides.${index}.printArea`}
+                        render={({ field }) => (
+                          <FormItem className="grid w-full">
+                            <FormLabel>Print area</FormLabel>
+                            <FormControl>
+                              <FileDialog
+                                setValue={form.setValue}
+                                maxFiles={1}
+                                maxSize={1024 * 1024 * 4}
+                                files={files}
+                                setFiles={setFiles}
+                                isUploading={isUploading}
+                                disabled={isPending}
+                                {...field}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  onClick={() => append({ title: "" })}
+                >
+                  Add side
+                </Button>
+              </div>
+              <DialogFooter>
+                <Button className="w-fit" disabled={isPending}>
+                  {isPending && (
+                    <Icons.spinner
+                      className="mr-2 h-4 w-4 animate-spin"
+                      aria-hidden="true"
+                    />
+                  )}
+                  Add Subcategory
+                  <span className="sr-only">Add Subcategory</span>
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   )
