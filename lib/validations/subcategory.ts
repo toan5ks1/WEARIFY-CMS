@@ -1,3 +1,4 @@
+import { sides } from "@/db/schema"
 import * as z from "zod"
 
 export const subcategorySchema = z.object({
@@ -22,7 +23,7 @@ export const subcategorySchema = z.object({
           message: "Must be at least 1 character",
         }),
         description: z.string().optional(),
-        image: z
+        mockup: z
           .unknown()
           .refine((val) => {
             if (!Array.isArray(val)) return false
@@ -32,24 +33,36 @@ export const subcategorySchema = z.object({
           .optional()
           .nullable()
           .default(null),
-        printArea: z
+        areaType: z.string().default(sides.areaType.enumValues[0]),
+        areaImage: z
           .unknown()
           .refine((val) => {
             if (!Array.isArray(val)) return false
-            return val.every((item) => {
-              if (item instanceof File) return true
-              if (
-                typeof item === "object" &&
-                "w" in item &&
-                "h" in item &&
-                "x" in item &&
-                "y" in item
-              ) {
-                return true
-              }
-              return false
+            if (val.some((file) => !(file instanceof File))) return false
+            return true
+          }, "Must be a File")
+          .optional()
+          .nullable()
+          .default(null),
+        dimension: z
+          .array(
+            z.object({
+              w: z
+                .number()
+                .min(0, {
+                  message: ">= 0",
+                })
+                .default(0),
+              h: z
+                .number()
+                .min(0, {
+                  message: ">= 0",
+                })
+                .default(0),
+              x: z.number().default(0),
+              y: z.number().default(0),
             })
-          }, "Must be an array of File or objects")
+          )
           .optional()
           .nullable()
           .default(null),

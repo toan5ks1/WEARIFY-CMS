@@ -1,4 +1,4 @@
-import type { Product, Store } from "@/db/schema"
+import type { Store } from "@/db/schema"
 import { type FileWithPath } from "react-dropzone"
 import type Stripe from "stripe"
 import { z } from "zod"
@@ -66,7 +66,7 @@ export type FileWithPreview = FileWithPath & {
   preview: string
 }
 
-export interface PrintArea {
+export interface Dimension {
   w: number
   h: number
   x: number

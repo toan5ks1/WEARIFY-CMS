@@ -9,7 +9,6 @@ import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 
 import { UpdateCategoryForm } from "./components/category-form"
-// import { AddCategoryDialog } from "./category-dialog"
 import { columns } from "./components/columns"
 import { AddSubcategoryDialog } from "./components/subcategory-dialog"
 

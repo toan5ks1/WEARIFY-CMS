@@ -1,16 +1,24 @@
-import type { CartItem, CheckoutItem, PrintArea, StoredFile } from "@/types"
+import {
+  type CartItem,
+  type CheckoutItem,
+  type Dimension,
+  type StoredFile,
+} from "@/types"
 import { relations } from "drizzle-orm"
 import {
   boolean,
   decimal,
   int,
   json,
+  mysqlEnum,
   mysqlTable,
   serial,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/mysql-core"
+
+import { AreaType } from "@/lib/const"
 
 export const stores = mysqlTable("stores", {
   id: serial("id").primaryKey(),
@@ -73,10 +81,10 @@ export const sides = mysqlTable("sides", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 191 }).notNull(),
   description: text("description"),
-  image: json("image").$type<StoredFile | null>().default(null),
-  printArea: json("printArea")
-    .$type<StoredFile | PrintArea | null>()
-    .default(null),
+  mockup: json("image").$type<StoredFile | null>().default(null),
+  areaImage: json("areaImage").$type<StoredFile | null>().default(null),
+  dimension: json("dimension").$type<Dimension[] | null>().default(null),
+  areaType: mysqlEnum("areaType", AreaType).default("image"),
   subcategoryId: int("subcategoryId").notNull(),
   productId: int("productId"),
   createdAt: timestamp("createdAt").defaultNow(),
