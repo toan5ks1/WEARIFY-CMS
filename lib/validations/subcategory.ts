@@ -47,22 +47,17 @@ export const subcategorySchema = z.object({
         dimension: z
           .array(
             z.object({
-              w: z
-                .number()
-                .min(0, {
-                  message: ">= 0",
-                })
-                .default(0),
-              h: z
-                .number()
-                .min(0, {
-                  message: ">= 0",
-                })
-                .default(0),
-              x: z.number().default(0),
-              y: z.number().default(0),
+              w: z.number().min(0).nullable().default(0),
+              h: z.number().min(0).nullable().default(0),
+              x: z.number().nullable().default(0),
+              y: z.number().nullable().default(0),
             })
           )
+          .refine((dimensions) => {
+            return dimensions.every(
+              (dim) => (!dim.w || dim.w >= 0) && (!dim.h || dim.h >= 0)
+            )
+          }, "Width & height must be greater than or equal to 0")
           .optional()
           .nullable()
           .default(null),

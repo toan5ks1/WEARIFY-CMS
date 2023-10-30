@@ -52,8 +52,9 @@ export default function PrintSide({
   const [printAreas, setPrintAreas] = React.useState<FileWithPreview[] | null>(
     null
   )
-  const [areaType, setAreaType] = React.useState<string>(AreaType[0])
+  const areaTypeDefault = form.getValues().sides ? form.getValues().sides![index].areaType : AreaType[0];
 
+  const [areaType, setAreaType] = React.useState<string>(areaTypeDefault)
   function changeAreaType(
     onChange: (event: string | React.ChangeEvent<Element>) => void,
     props: string
@@ -128,7 +129,7 @@ export default function PrintSide({
                     <PopoverTrigger asChild>
                       <Button variant="outline">Set dimensions</Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-80">
+                    <PopoverContent className="w-80" onFocusOutside={(event) => {event.preventDefault()}}>
                       <div className="grid gap-4">
                         <div className="space-y-2">
                           <h4 className="font-medium leading-none">
@@ -214,11 +215,7 @@ export default function PrintSide({
                       </div>
                     </PopoverContent>
                   </Popover>
-                  <UncontrolledFormMessage
-                    message={form.formState.errors.title?.message}
-                  />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             ) : null}
             <FormField
@@ -256,6 +253,12 @@ export default function PrintSide({
               height={80}
             />
           ) : null}
+          <UncontrolledFormMessage
+            message={
+              form.formState.errors.sides &&
+              form.formState.errors.sides[index]?.dimension?.message
+            }
+          />
         </div>
       </div>
     </div>

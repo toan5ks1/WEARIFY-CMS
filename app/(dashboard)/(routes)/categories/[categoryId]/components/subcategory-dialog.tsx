@@ -94,14 +94,13 @@ export function AddSubcategoryDialog() {
           <Plus className="mr-2 h-4 w-4" /> Add New
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-4 sm:max-w-2xl lg:h-[80dvh] lg:overflow-hidden">
+      <DialogContent className="flex flex-col gap-4 sm:max-w-2xl lg:h-[80dvh]">
         <DialogHeader>
           <DialogTitle>Add subcategory</DialogTitle>
         </DialogHeader>
         <ScrollArea
           className="h-full"
           scrollBarClassName="hidden"
-          type="scroll"
         >
           <Form {...form}>
             <form
