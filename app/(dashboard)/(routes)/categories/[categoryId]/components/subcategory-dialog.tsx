@@ -98,10 +98,7 @@ export function AddSubcategoryDialog() {
         <DialogHeader>
           <DialogTitle>Add subcategory</DialogTitle>
         </DialogHeader>
-        <ScrollArea
-          className="h-full"
-          scrollBarClassName="hidden"
-        >
+        <ScrollArea className="h-full" scrollBarClassName="hidden">
           <Form {...form}>
             <form
               className="grid w-full gap-5 px-1"

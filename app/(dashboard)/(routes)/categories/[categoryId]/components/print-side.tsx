@@ -3,10 +3,10 @@
 import React from "react"
 import Image from "next/image"
 import { FileWithPreview } from "@/types"
-import { type FieldArrayWithId, type UseFormReturn } from "react-hook-form"
+import { type UseFormReturn } from "react-hook-form"
 
 import { AreaType } from "@/lib/const"
-import { toTitleCase } from "@/lib/utils"
+import { nanToNull, toTitleCase } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   FormControl,
@@ -52,16 +52,37 @@ export default function PrintSide({
   const [printAreas, setPrintAreas] = React.useState<FileWithPreview[] | null>(
     null
   )
-  const areaTypeDefault = form.getValues().sides ? form.getValues().sides![index].areaType : AreaType[0];
+  const areaTypeDefault = form.getValues().sides
+    ? form.getValues().sides![index].areaType
+    : AreaType[0]
 
   const [areaType, setAreaType] = React.useState<string>(areaTypeDefault)
   function changeAreaType(
     onChange: (event: string | React.ChangeEvent<Element>) => void,
     props: string
   ) {
+    if (areaType === "image") {
+      setPrintAreas(null)
+      form.resetField(`sides.${index}.areaImage`)
+    } else {
+      form.resetField(`sides.${index}.dimension`)
+    }
+
     setAreaType(props)
 
     return onChange(props)
+  }
+
+  const getDimensionError = () => {
+    if (
+      form.formState.errors.sides &&
+      form.formState.errors.sides[index]?.dimension
+    ) {
+      const dimension = form.formState.errors.sides[index]?.dimension
+      const err = dimension && dimension[0] && dimension[0].message
+
+      return err || undefined
+    }
   }
 
   return (
@@ -105,14 +126,14 @@ export default function PrintSide({
           ) : null}
         </FormItem>
         <div className="flex w-full flex-col gap-3">
-          <FormLabel htmlFor="width">Print area</FormLabel>
+          <FormLabel>Print area</FormLabel>
           <div className="grid grid-cols-2 gap-1">
             {areaType === AreaType[0] ? (
               <FormItem className="self-end">
                 <FormControl>
                   <FileDialog
                     setValue={form.setValue}
-                    name={`sides.${index}.areaImage`}
+                    {...form.register(`sides.${index}.areaImage`)}
                     maxFiles={1}
                     maxSize={1024 * 1024 * 4}
                     files={printAreas}
@@ -121,6 +142,15 @@ export default function PrintSide({
                     disabled={isPending}
                   />
                 </FormControl>
+                {printAreas?.length ? (
+                  <Image
+                    src={printAreas[0].preview}
+                    alt={printAreas[0].name}
+                    className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
+                    width={80}
+                    height={80}
+                  />
+                ) : null}
               </FormItem>
             ) : areaType === AreaType[1] ? (
               <FormItem className="self-end">
@@ -129,7 +159,12 @@ export default function PrintSide({
                     <PopoverTrigger asChild>
                       <Button variant="outline">Set dimensions</Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-80" onFocusOutside={(event) => {event.preventDefault()}}>
+                    <PopoverContent
+                      className="w-80"
+                      onInteractOutside={(event) => {
+                        event.preventDefault()
+                      }}
+                    >
                       <div className="grid gap-4">
                         <div className="space-y-2">
                           <h4 className="font-medium leading-none">
@@ -151,7 +186,7 @@ export default function PrintSide({
                                 {...form.register(
                                   `sides.${index}.dimension.0.w`,
                                   {
-                                    valueAsNumber: true,
+                                    setValueAs: nanToNull,
                                   }
                                 )}
                               />
@@ -168,7 +203,7 @@ export default function PrintSide({
                                 {...form.register(
                                   `sides.${index}.dimension.0.h`,
                                   {
-                                    valueAsNumber: true,
+                                    setValueAs: nanToNull,
                                   }
                                 )}
                               />
@@ -186,7 +221,7 @@ export default function PrintSide({
                                 {...form.register(
                                   `sides.${index}.dimension.0.x`,
                                   {
-                                    valueAsNumber: true,
+                                    setValueAs: nanToNull,
                                   }
                                 )}
                               />
@@ -204,7 +239,7 @@ export default function PrintSide({
                                 {...form.register(
                                   `sides.${index}.dimension.0.y`,
                                   {
-                                    valueAsNumber: true,
+                                    setValueAs: nanToNull,
                                   }
                                 )}
                               />
@@ -216,6 +251,7 @@ export default function PrintSide({
                     </PopoverContent>
                   </Popover>
                 </FormControl>
+                <UncontrolledFormMessage message={getDimensionError()} />
               </FormItem>
             ) : null}
             <FormField
@@ -244,21 +280,6 @@ export default function PrintSide({
               )}
             />
           </div>
-          {printAreas?.length ? (
-            <Image
-              src={printAreas[0].preview}
-              alt={printAreas[0].name}
-              className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
-              width={80}
-              height={80}
-            />
-          ) : null}
-          <UncontrolledFormMessage
-            message={
-              form.formState.errors.sides &&
-              form.formState.errors.sides[index]?.dimension?.message
-            }
-          />
         </div>
       </div>
     </div>
