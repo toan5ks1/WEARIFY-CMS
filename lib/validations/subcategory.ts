@@ -23,6 +23,7 @@ export const subcategorySchema = z.object({
           message: "Must be at least 1 character",
         }),
         description: z.string().optional(),
+        subcategoryId: z.number(),
         mockup: z
           .unknown()
           .refine((val) => {
@@ -63,5 +64,6 @@ export const subcategorySchema = z.object({
           .default(null),
       })
     )
-    .optional(),
+    .optional()
+    .nullable(),
 })

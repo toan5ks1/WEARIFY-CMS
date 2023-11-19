@@ -4,4 +4,5 @@ export const defaultSide = {
   title: "",
   areaType: AreaType[0],
   dimension: null,
+  subcategoryId: NaN,
 }

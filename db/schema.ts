@@ -86,18 +86,15 @@ export const sides = mysqlTable("sides", {
   dimension: json("dimension").$type<Dimension[] | null>().default(null),
   areaType: mysqlEnum("areaType", AreaType).default("image"),
   subcategoryId: int("subcategoryId").notNull(),
-  productId: int("productId"),
   createdAt: timestamp("createdAt").defaultNow(),
 })
+
+export type Side = typeof sides.$inferSelect
 
 export const sideRelations = relations(sides, ({ one }) => ({
   subcategory: one(subcategories, {
     fields: [sides.subcategoryId],
     references: [subcategories.id],
-  }),
-  product: one(products, {
-    fields: [sides.productId],
-    references: [products.id],
   }),
 }))
 

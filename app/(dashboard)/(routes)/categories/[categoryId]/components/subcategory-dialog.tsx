@@ -3,7 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { FileWithPreview } from "@/types"
+import { FileWithPreview, StoredFile } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { Plus } from "lucide-react"
@@ -12,7 +12,7 @@ import { toast } from "sonner"
 import { type z } from "zod"
 
 import { defaultSide } from "@/lib/const"
-import { catchError } from "@/lib/utils"
+import { catchError, isArrayOfFile } from "@/lib/utils"
 import { subcategorySchema } from "@/lib/validations/subcategory"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,6 +38,11 @@ import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
 import { addCategoryAction } from "@/app/_actions/category"
+import { addSideAction } from "@/app/_actions/side"
+import {
+  addSubcategoryAction,
+  checkSubcategoryAction,
+} from "@/app/_actions/subcategory"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
 import PrintSide from "./print-side"
@@ -46,7 +51,13 @@ export type Inputs = z.infer<typeof subcategorySchema>
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>()
 
-export function AddSubcategoryDialog() {
+interface AddSubcategoryDialogProps {
+  categoryId: number
+}
+
+export function AddSubcategoryDialog({
+  categoryId,
+}: AddSubcategoryDialogProps) {
   const router = useRouter()
   const [isPending, startTransition] = React.useTransition()
   const [files, setFiles] = React.useState<FileWithPreview[] | null>(null)
@@ -71,20 +82,77 @@ export function AddSubcategoryDialog() {
     control: form.control,
   })
 
-  function onSubmit(data: Inputs) {
-    console.log(data)
-    // startTransition(async () => {
-    //   try {
-    //     await addCategoryAction({ ...data })
+  function onSubmit({ sides, ...data }: Inputs) {
+    startTransition(async () => {
+      try {
+        await checkSubcategoryAction({
+          title: data.title,
+          categoryId,
+        })
 
-    //     form.reset()
-    //     toast.success("Category added successfully.")
-    //     router.push("/categories")
-    //     router.refresh() // Workaround for the inconsistency of cache revalidation
-    //   } catch (err) {
-    //     catchError(err)
-    //   }
-    // })
+        const images = isArrayOfFile(data.images)
+          ? await startUpload(data.images).then((res) => {
+              const formattedImages = res?.map((image) => ({
+                id: image.key,
+                name: image.key.split("_")[1] ?? image.key,
+                url: image.url,
+              }))
+              return formattedImages ? formattedImages[0] : null
+            })
+          : null
+
+        const subcategoryId = await addSubcategoryAction({
+          ...data,
+          images,
+          categoryId,
+        })
+
+        const sidesMapped = sides?.length
+          ? await Promise.all(
+              sides.map(async (side) => {
+                const mockup = isArrayOfFile(side.mockup)
+                  ? await startUpload(side.mockup).then((res) => {
+                      const formattedImages = res?.map((image) => ({
+                        id: image.key,
+                        name: image.key.split("_")[1] ?? image.key,
+                        url: image.url,
+                      }))
+
+                      return formattedImages ?? null
+                    })
+                  : null
+
+                const areaImage = isArrayOfFile(side.areaImage)
+                  ? await startUpload(side.areaImage).then((res) => {
+                      const formattedImages = res?.map((image) => ({
+                        id: image.key,
+                        name: image.key.split("_")[1] ?? image.key,
+                        url: image.url,
+                      }))
+
+                      return formattedImages ?? null
+                    })
+                  : null
+
+                side.subcategoryId = Number(subcategoryId)
+                side.mockup = mockup as StoredFile[]
+                side.areaImage = areaImage
+
+                return side
+              })
+            )
+          : null
+
+        await addSideAction(sidesMapped)
+
+        toast.success("Subcategory added successfully.")
+
+        form.reset()
+        setFiles(null)
+      } catch (err) {
+        catchError(err)
+      }
+    })
   }
 
   return (

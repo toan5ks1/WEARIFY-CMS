@@ -43,7 +43,7 @@ const CategoryPage = async ({ params }: { params: { categoryId: string } }) => {
             title={`Subcategories (${allSubcategory.length})`}
             description="Manage subcategories for your store"
           />
-          <AddSubcategoryDialog />
+          <AddSubcategoryDialog categoryId={categoryId} />
         </div>
         <Separator />
         <DataTable searchKey="title" columns={columns} data={allSubcategory} />

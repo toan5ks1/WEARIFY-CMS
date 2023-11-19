@@ -24,7 +24,7 @@ export const cartLineItemSchema = z.object({
     )
     .optional()
     .nullable(),
-  category: z.enum(products.category.enumValues),
+  // category: products.subcategoryId,
   subcategory: z.string().optional().nullable(),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/),
   inventory: z.number().default(0),
