@@ -35,7 +35,7 @@ export async function checkSubcategoryAction(input: {
 }
 
 export async function addSubcategoryAction(
-  input: z.infer<typeof subcategorySchema> & {
+  input: Omit<z.infer<typeof subcategorySchema>, "sides"> & {
     categoryId: number
     images: StoredFile | null
   }

@@ -3,6 +3,7 @@ import { type FileWithPath } from "react-dropzone"
 import type Stripe from "stripe"
 import { z } from "zod"
 
+import { AreaType } from "@/lib/const"
 import {
   type cartItemSchema,
   type checkoutItemSchema,
@@ -67,8 +68,18 @@ export type FileWithPreview = FileWithPath & {
 }
 
 export interface Dimension {
-  w: number
-  h: number
-  x: number
-  y: number
+  w: number | null
+  h: number | null
+  x: number | null
+  y: number | null
+}
+
+export interface Side {
+  title: string
+  description?: string
+  dimension: Dimension[] | null
+  areaType: "image" | "dimension"
+  subcategoryId: number
+  mockup: StoredFile | null
+  areaImage: StoredFile | null
 }

@@ -3,7 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { FileWithPreview, StoredFile } from "@/types"
+import { FileWithPreview, Side, StoredFile } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { Plus } from "lucide-react"
@@ -37,7 +37,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
-import { addCategoryAction } from "@/app/_actions/category"
 import { addSideAction } from "@/app/_actions/side"
 import {
   addSubcategoryAction,
@@ -108,7 +107,7 @@ export function AddSubcategoryDialog({
         })
 
         const sidesMapped = sides?.length
-          ? await Promise.all(
+          ? ((await Promise.all(
               sides.map(async (side) => {
                 const mockup = isArrayOfFile(side.mockup)
                   ? await startUpload(side.mockup).then((res) => {
@@ -135,15 +134,15 @@ export function AddSubcategoryDialog({
                   : null
 
                 side.subcategoryId = Number(subcategoryId)
-                side.mockup = mockup as StoredFile[]
+                side.mockup = mockup
                 side.areaImage = areaImage
 
                 return side
               })
-            )
+            )) as Side[])
           : null
 
-        await addSideAction(sidesMapped)
+        sidesMapped && (await addSideAction(sidesMapped))
 
         toast.success("Subcategory added successfully.")
 
@@ -253,7 +252,7 @@ export function AddSubcategoryDialog({
                 Add side
               </Button>
               <DialogFooter className="sticky">
-                <Button className="w-fit" disabled={isPending}>
+                <Button className="w-fit" disabled={isPending} type="submit">
                   {isPending && (
                     <Icons.spinner
                       className="mr-2 h-4 w-4 animate-spin"

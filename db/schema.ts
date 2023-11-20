@@ -89,8 +89,6 @@ export const sides = mysqlTable("sides", {
   createdAt: timestamp("createdAt").defaultNow(),
 })
 
-export type Side = typeof sides.$inferSelect
-
 export const sideRelations = relations(sides, ({ one }) => ({
   subcategory: one(subcategories, {
     fields: [sides.subcategoryId],

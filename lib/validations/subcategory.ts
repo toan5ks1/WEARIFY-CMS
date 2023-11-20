@@ -1,6 +1,8 @@
 import { sides } from "@/db/schema"
 import * as z from "zod"
 
+import { AreaType } from "../const"
+
 export const subcategorySchema = z.object({
   title: z.string().min(1, {
     message: "Must be at least 1 character",
@@ -23,7 +25,7 @@ export const subcategorySchema = z.object({
           message: "Must be at least 1 character",
         }),
         description: z.string().optional(),
-        subcategoryId: z.number(),
+        subcategoryId: z.number().optional().nullable().default(null),
         mockup: z
           .unknown()
           .refine((val) => {
@@ -34,7 +36,7 @@ export const subcategorySchema = z.object({
           .optional()
           .nullable()
           .default(null),
-        areaType: z.string().default(sides.areaType.enumValues[0]),
+        areaType: z.enum(AreaType).default(sides.areaType.enumValues[0]),
         areaImage: z
           .unknown()
           .refine((val) => {
@@ -65,5 +67,6 @@ export const subcategorySchema = z.object({
       })
     )
     .optional()
-    .nullable(),
+    .nullable()
+    .default(null),
 })

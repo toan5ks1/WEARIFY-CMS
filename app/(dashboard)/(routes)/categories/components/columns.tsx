@@ -24,7 +24,9 @@ export const columns: ColumnDef<CategoryColumn>[] = [
     header: "Sub category",
     cell: ({ row }) =>
       row.original.subcategories.map((sub) => (
-        <Badge key={sub.title}>{sub.title}</Badge>
+        <Badge key={sub.title} className="mx-0.5">
+          {sub.title}
+        </Badge>
       )),
   },
   {

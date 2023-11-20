@@ -58,7 +58,9 @@ export default function PrintSide({
 
   const [areaType, setAreaType] = React.useState<string>(areaTypeDefault)
   function changeAreaType(
-    onChange: (event: string | React.ChangeEvent<Element>) => void,
+    onChange: (
+      event: "image" | "dimension" | React.ChangeEvent<Element>
+    ) => void,
     props: string
   ) {
     if (areaType === "image") {
@@ -70,7 +72,7 @@ export default function PrintSide({
 
     setAreaType(props)
 
-    return onChange(props)
+    return onChange(props as "image" | "dimension")
   }
 
   const getDimensionError = () => {
