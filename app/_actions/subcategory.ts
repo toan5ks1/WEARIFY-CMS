@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
-import { subcategories } from "@/db/schema"
+import { sides, subcategories } from "@/db/schema"
 import { StoredFile } from "@/types"
 import { and, eq, not, or } from "drizzle-orm"
 import { type z } from "zod"
@@ -87,30 +87,36 @@ export async function addSubcategoryAction(
 //   revalidatePath("/categories");
 // }
 
-// export async function deleteCategoryAction({id}: {id: number}) {
-//   const category = await db.query.categories.findFirst({
-//     where: eq(categories.id, id),
-//     columns: {
-//       id: true,
-//     },
-//     with: {
-//       subcategories: {
-//         columns: {
-//           id: true,
-//         },
-//       }
-//     }
-//   })
+export async function deleteSubcategoryAction({
+  id,
+  categoryId,
+}: {
+  id: number
+  categoryId: number
+}) {
+  const subcategory = await db.query.subcategories.findFirst({
+    where: eq(subcategories.id, id),
+    columns: {
+      id: true,
+    },
+    with: {
+      sides: {
+        columns: {
+          id: true,
+        },
+      },
+    },
+  })
 
-//   if (!category) {
-//     throw new Error("Store not found")
-//   }
+  if (!subcategory) {
+    throw new Error("Subcategory not found")
+  }
 
-//   if (category.subcategories.length) {
-//     throw new Error("Make sure you removed all subcategory using this category first")
-//   }
+  if (subcategory.sides.length) {
+    await db.delete(sides).where(eq(sides.subcategoryId, id))
+  }
 
-//   await db.delete(categories).where(eq(categories.id, id))
+  await db.delete(subcategories).where(eq(subcategories.id, id))
 
-//   revalidatePath("/categories")
-// }
+  revalidatePath(`/categories/${categoryId}`)
+}

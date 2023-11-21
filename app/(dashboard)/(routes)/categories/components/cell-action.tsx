@@ -1,53 +1,53 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react"
 import { toast } from "sonner"
-import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
+import { catchError } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { AlertModal } from "@/components/modals/alert-modal";
+} from "@/components/ui/dropdown-menu"
+import { AlertModal } from "@/components/modals/alert-modal"
+import { deleteCategoryAction } from "@/app/_actions/category"
 
-import { CategoryColumn } from "./columns";
-import { catchError } from "@/lib/utils";
-import { deleteCategoryAction } from "@/app/_actions/category";
+import { CategoryColumn } from "./columns"
 
 interface CellActionProps {
-  data: CategoryColumn;
+  data: CategoryColumn
 }
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
-  const router = useRouter();
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const onConfirm = async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       await deleteCategoryAction({ id: data.id })
-  
+
       toast.success("Category deleted successfully.")
       router.push("/categories")
-      router.refresh() 
+      router.refresh()
     } catch (err) {
       catchError(err)
     } finally {
-      setOpen(false);
-      setLoading(false);
+      setOpen(false)
+      setLoading(false)
     }
-  };
+  }
 
   const onCopy = (id: number) => {
-    navigator.clipboard.writeText(id.toString());
-    toast.success("Category ID copied to clipboard.");
-  };
+    navigator.clipboard.writeText(id.toString())
+    toast.success("Category ID copied to clipboard.")
+  }
 
   return (
     <>
@@ -80,5 +80,5 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuContent>
       </DropdownMenu>
     </>
-  );
-};
+  )
+}
