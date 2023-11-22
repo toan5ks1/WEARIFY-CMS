@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react"
 import { toast } from "sonner"
@@ -25,22 +24,15 @@ interface CellActionProps {
 
 export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
 
   const onConfirm = async () => {
     try {
-      setLoading(true)
       await deleteCategoryAction({ id: data.id })
 
       toast.success("Category deleted successfully.")
-      router.push("/categories")
       router.refresh()
     } catch (err) {
       catchError(err)
-    } finally {
-      setOpen(false)
-      setLoading(false)
     }
   }
 
@@ -51,12 +43,6 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   return (
     <>
-      <AlertModal
-        isOpen={open}
-        onClose={() => setOpen(false)}
-        onConfirm={onConfirm}
-        loading={loading}
-      />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -74,9 +60,11 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
           >
             <Edit className="mr-2 h-4 w-4" /> Update
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setOpen(true)}>
-            <Trash className="mr-2 h-4 w-4" /> Delete
-          </DropdownMenuItem>
+          <AlertModal onConfirm={onConfirm}>
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              <Trash className="mr-2 h-4 w-4" /> Delete
+            </DropdownMenuItem>
+          </AlertModal>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
