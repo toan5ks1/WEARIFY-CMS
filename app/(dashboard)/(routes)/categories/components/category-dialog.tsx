@@ -53,7 +53,6 @@ export function AddCategoryDialog() {
 
         form.reset()
         toast.success("Category added successfully.")
-        router.push("/categories")
         router.refresh() // Workaround for the inconsistency of cache revalidation
       } catch (err) {
         catchError(err)

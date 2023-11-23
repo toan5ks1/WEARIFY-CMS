@@ -12,7 +12,7 @@ import { toast } from "sonner"
 import { type z } from "zod"
 
 import { defaultSide } from "@/lib/const"
-import { catchError, isArrayOfFile } from "@/lib/utils"
+import { catchError, isArrayOfFile, slugify } from "@/lib/utils"
 import { subcategorySchema } from "@/lib/validations/subcategory"
 import { Button } from "@/components/ui/button"
 import {
@@ -44,20 +44,20 @@ import {
 } from "@/app/_actions/subcategory"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
+import { SubcategoryColumn } from "./columns"
 import PrintSide from "./print-side"
 
 export type Inputs = z.infer<typeof subcategorySchema>
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>()
 
-interface AddSubcategoryDialogProps {
+interface UpdateSubcategoryDialogProps {
   categoryId: number
 }
 
-export function AddSubcategoryDialog({
+export function UpdateSubcategoryDialog({
   categoryId,
-}: AddSubcategoryDialogProps) {
-  const router = useRouter()
+}: UpdateSubcategoryDialogProps) {
   const [isPending, startTransition] = React.useTransition()
   const [files, setFiles] = React.useState<FileWithPreview[] | null>(null)
 
@@ -104,6 +104,7 @@ export function AddSubcategoryDialog({
           ...data,
           images,
           categoryId,
+          slug: slugify(data.title),
         })
 
         const sidesMapped = sides?.length
@@ -117,7 +118,7 @@ export function AddSubcategoryDialog({
                         url: image.url,
                       }))
 
-                      return formattedImages ?? null
+                      return formattedImages ? formattedImages[0] : null
                     })
                   : null
 
@@ -129,7 +130,7 @@ export function AddSubcategoryDialog({
                         url: image.url,
                       }))
 
-                      return formattedImages ?? null
+                      return formattedImages ? formattedImages[0] : null
                     })
                   : null
 
@@ -155,7 +156,7 @@ export function AddSubcategoryDialog({
   }
 
   return (
-    <Dialog>
+    <Dialog modal={false}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" /> Add New

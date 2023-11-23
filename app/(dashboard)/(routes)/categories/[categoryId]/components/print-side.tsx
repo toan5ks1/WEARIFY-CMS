@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select"
 import { FileDialog } from "@/components/file-dialog"
 
-import { Inputs } from "./subcategory-dialog"
+import { Inputs } from "./add-subcategory-dialog"
 
 interface PrintSideProps {
   form: UseFormReturn<Inputs, any, undefined>
@@ -161,12 +161,7 @@ export default function PrintSide({
                     <PopoverTrigger asChild>
                       <Button variant="outline">Set dimensions</Button>
                     </PopoverTrigger>
-                    <PopoverContent
-                      className="w-80"
-                      onInteractOutside={(event) => {
-                        event.preventDefault()
-                      }}
-                    >
+                    <PopoverContent className="w-80">
                       <div className="grid gap-4">
                         <div className="space-y-2">
                           <h4 className="font-medium leading-none">

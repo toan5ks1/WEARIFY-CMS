@@ -77,6 +77,7 @@ export interface Dimension {
 export interface Side {
   title: string
   description?: string
+  slug: string
   dimension: Dimension[] | null
   areaType: "image" | "dimension"
   subcategoryId: number

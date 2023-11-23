@@ -40,12 +40,7 @@ export async function addSubcategoryAction(
     images: StoredFile | null
   }
 ) {
-  const result = await db.insert(subcategories).values({
-    categoryId: input.categoryId,
-    title: input.title,
-    description: input.description,
-    images: input.images,
-  })
+  const result = await db.insert(subcategories).values(input)
 
   revalidatePath(`/categories/${input.categoryId}`)
 

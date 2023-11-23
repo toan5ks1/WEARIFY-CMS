@@ -1,6 +1,7 @@
 "use client"
 
 import { Subcategory } from "@/db/schema"
+import { Side } from "@/types"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 
@@ -24,7 +25,7 @@ export const columns: ColumnDef<SubcategoryColumn>[] = [
     header: "Description",
   },
   {
-    accessorKey: "side",
+    accessorKey: "sides",
     header: "Print side",
     cell: ({ row }) =>
       row.original.sides.map((side) => (

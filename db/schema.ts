@@ -18,8 +18,6 @@ import {
   varchar,
 } from "drizzle-orm/mysql-core"
 
-import { AreaType } from "@/lib/const"
-
 export const stores = mysqlTable("stores", {
   id: serial("id").primaryKey(),
   userId: varchar("userId", { length: 191 }).notNull(),
@@ -58,7 +56,7 @@ export const subcategories = mysqlTable("sub_category", {
   title: varchar("title", { length: 191 }).notNull(),
   description: text("description"),
   images: json("image").$type<StoredFile | null>().default(null),
-  slug: varchar("slug", { length: 191 }),
+  slug: text("slug"),
   categoryId: int("categoryId").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
 })
@@ -84,10 +82,12 @@ export const sides = mysqlTable("sides", {
   mockup: json("image").$type<StoredFile | null>().default(null),
   areaImage: json("areaImage").$type<StoredFile | null>().default(null),
   dimension: json("dimension").$type<Dimension[] | null>().default(null),
-  areaType: mysqlEnum("areaType", AreaType).default("image"),
+  areaType: mysqlEnum("areaType", ["image", "dimension"]).default("image"),
   subcategoryId: int("subcategoryId").notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
 })
+
+export type Sides = typeof subcategories.$inferSelect
 
 export const sideRelations = relations(sides, ({ one }) => ({
   subcategory: one(subcategories, {

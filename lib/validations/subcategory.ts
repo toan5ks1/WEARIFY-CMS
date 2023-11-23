@@ -8,6 +8,7 @@ export const subcategorySchema = z.object({
     message: "Must be at least 1 character",
   }),
   description: z.string().optional(),
+  slug: z.string().optional(),
   images: z
     .unknown()
     .refine((val) => {

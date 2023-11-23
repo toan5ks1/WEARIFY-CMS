@@ -8,9 +8,9 @@ import { DataTable } from "@/components/ui/data-table"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 
+import { AddSubcategoryDialog } from "./components/add-subcategory-dialog"
 import { UpdateCategoryForm } from "./components/category-form"
 import { columns } from "./components/columns"
-import { AddSubcategoryDialog } from "./components/subcategory-dialog"
 
 const CategoryPage = async ({ params }: { params: { categoryId: string } }) => {
   const categoryId = Number(params.categoryId)
