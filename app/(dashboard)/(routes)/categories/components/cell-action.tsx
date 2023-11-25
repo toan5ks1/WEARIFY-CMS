@@ -30,7 +30,6 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       await deleteCategoryAction({ id: data.id })
 
       toast.success("Category deleted successfully.")
-      router.refresh()
     } catch (err) {
       catchError(err)
     }

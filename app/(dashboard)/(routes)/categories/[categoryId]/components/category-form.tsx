@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import { Category } from "@/db/schema"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -18,13 +19,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
+import { Heading } from "@/components/ui/heading"
 import { Input } from "@/components/ui/input"
+import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Icons } from "@/components/icons"
 import { updateCategoryAction } from "@/app/_actions/category"
-import { Category } from "@/db/schema"
-import { Heading } from "@/components/ui/heading"
-import { Separator } from "@/components/ui/separator"
 
 type Inputs = z.infer<typeof categorySchema> & {
   id: number
@@ -34,16 +34,15 @@ interface CategoryClientProps {
   category: Category
 }
 
-export function UpdateCategoryForm({category}: CategoryClientProps) {
-  const router = useRouter()
+export function UpdateCategoryForm({ category }: CategoryClientProps) {
   const [isPending, startTransition] = React.useTransition()
 
   const form = useForm<Inputs>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       title: category.title,
-      description: category?.description ?? undefined
-    }
+      description: category?.description ?? undefined,
+    },
   })
 
   function onSubmit(data: Inputs) {
@@ -53,8 +52,6 @@ export function UpdateCategoryForm({category}: CategoryClientProps) {
 
         form.reset()
         toast.success("Category updated successfully.")
-        router.push("/categories")
-        router.refresh() // Workaround for the inconsistency of cache revalidation
       } catch (err) {
         catchError(err)
       }
@@ -108,11 +105,11 @@ export function UpdateCategoryForm({category}: CategoryClientProps) {
                 className="mr-2 h-4 w-4 animate-spin"
                 aria-hidden="true"
               />
-              )}
-              Update Category
-              <span className="sr-only">Update Category</span>
+            )}
+            Update Category
+            <span className="sr-only">Update Category</span>
           </Button>
-        </form>        
+        </form>
       </Form>
     </div>
   )

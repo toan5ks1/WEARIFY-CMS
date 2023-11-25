@@ -162,111 +162,109 @@ export function AddSubcategoryDialog({
           <Plus className="mr-2 h-4 w-4" /> Add New
         </Button>
       </DialogTrigger>
-      <DialogContent className="flex flex-col gap-4 sm:max-w-2xl lg:h-[80dvh]">
+      <DialogContent className="scrollbar-hidden no-scrollbar flex max-h-screen flex-col gap-4 overflow-y-scroll sm:max-w-2xl lg:h-[80dvh]">
         <DialogHeader>
           <DialogTitle>Add subcategory</DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-full" scrollBarClassName="hidden">
-          <Form {...form}>
-            <form
-              className="grid w-full gap-5 px-1"
-              onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
-            >
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Type subcategory name here."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Type subcategory description here."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormItem className="flex w-full flex-col gap-1.5">
-                <FormLabel>Images</FormLabel>
-                {files?.length ? (
-                  <Image
-                    src={files[0].preview}
-                    alt={files[0].name}
-                    className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
-                    width={80}
-                    height={80}
-                  />
-                ) : null}
-                <FormControl>
-                  <FileDialog
-                    setValue={form.setValue}
-                    name="images"
-                    maxFiles={1}
-                    maxSize={1024 * 1024 * 4}
-                    files={files}
-                    setFiles={setFiles}
-                    isUploading={isUploading}
-                    disabled={isPending}
-                  />
-                </FormControl>
-                <UncontrolledFormMessage
-                  message={form.formState.errors.images?.message}
-                />
-              </FormItem>
-              <FormLabel className="font-semibold">Print sides</FormLabel>
-              <div className="flex flex-col gap-6">
-                {fields.map((field, index) => (
-                  <PrintSide
-                    key={index}
-                    index={index}
-                    form={form}
-                    isPending={isPending}
-                    isUploading={isUploading}
-                  />
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={addSide}
-              >
-                Add side
-              </Button>
-              <DialogFooter className="sticky">
-                <Button className="w-fit" disabled={isPending} type="submit">
-                  {isPending && (
-                    <Icons.spinner
-                      className="mr-2 h-4 w-4 animate-spin"
-                      aria-hidden="true"
+        <Form {...form}>
+          <form
+            className="grid w-full gap-5 px-1"
+            onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
+          >
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Type subcategory name here."
+                      {...field}
                     />
-                  )}
-                  Add Subcategory
-                  <span className="sr-only">Add Subcategory</span>
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </ScrollArea>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Type subcategory description here."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormItem className="flex w-full flex-col gap-1.5">
+              <FormLabel>Images</FormLabel>
+              {files?.length ? (
+                <Image
+                  src={files[0].preview}
+                  alt={files[0].name}
+                  className="h-20 w-20 shrink-0 rounded-md object-cover object-center"
+                  width={80}
+                  height={80}
+                />
+              ) : null}
+              <FormControl>
+                <FileDialog
+                  setValue={form.setValue}
+                  name="images"
+                  maxFiles={1}
+                  maxSize={1024 * 1024 * 4}
+                  files={files}
+                  setFiles={setFiles}
+                  isUploading={isUploading}
+                  disabled={isPending}
+                />
+              </FormControl>
+              <UncontrolledFormMessage
+                message={form.formState.errors.images?.message}
+              />
+            </FormItem>
+            <FormLabel className="font-semibold">Print sides</FormLabel>
+            <div className="flex flex-col gap-6">
+              {fields.map((field, index) => (
+                <PrintSide
+                  key={index}
+                  index={index}
+                  form={form}
+                  isPending={isPending}
+                  isUploading={isUploading}
+                />
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={addSide}
+            >
+              Add side
+            </Button>
+            <DialogFooter className="sticky">
+              <Button className="w-fit" disabled={isPending} type="submit">
+                {isPending && (
+                  <Icons.spinner
+                    className="mr-2 h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
+                )}
+                Add Subcategory
+                <span className="sr-only">Add Subcategory</span>
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

@@ -35,7 +35,6 @@ import { addCategoryAction } from "@/app/_actions/category"
 type Inputs = z.infer<typeof categorySchema>
 
 export function AddCategoryDialog() {
-  const router = useRouter()
   const [isPending, startTransition] = React.useTransition()
 
   const form = useForm<Inputs>({
@@ -53,7 +52,6 @@ export function AddCategoryDialog() {
 
         form.reset()
         toast.success("Category added successfully.")
-        router.refresh() // Workaround for the inconsistency of cache revalidation
       } catch (err) {
         catchError(err)
       }
