@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { FileWithPreview, Side, StoredFile } from "@/types"
+import { FileWithPreview, Side } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { Plus } from "lucide-react"
@@ -33,7 +32,6 @@ import {
   UncontrolledFormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
@@ -44,10 +42,9 @@ import {
 } from "@/app/_actions/subcategory"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
-import { SubcategoryColumn } from "./columns"
 import PrintSide from "./print-side"
 
-export type Inputs = z.infer<typeof subcategorySchema>
+export type InputSubcategory = z.infer<typeof subcategorySchema>
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>()
 
@@ -63,7 +60,7 @@ export function AddSubcategoryDialog({
 
   const { isUploading, startUpload } = useUploadThing("productImage")
 
-  const form = useForm<Inputs>({
+  const form = useForm<InputSubcategory>({
     resolver: zodResolver(subcategorySchema),
     defaultValues: {
       title: "",
@@ -81,7 +78,7 @@ export function AddSubcategoryDialog({
     control: form.control,
   })
 
-  function onSubmit({ sides, ...data }: Inputs) {
+  function onSubmit({ sides, ...data }: InputSubcategory) {
     startTransition(async () => {
       try {
         await checkSubcategoryAction({
@@ -164,7 +161,7 @@ export function AddSubcategoryDialog({
       </DialogTrigger>
       <DialogContent className="scrollbar-hidden no-scrollbar flex max-h-screen flex-col gap-4 overflow-y-scroll sm:max-w-2xl lg:h-[80dvh]">
         <DialogHeader>
-          <DialogTitle>Add subcategory</DialogTitle>
+          <DialogTitle>Subcategory</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form

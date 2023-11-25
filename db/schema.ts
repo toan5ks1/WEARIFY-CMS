@@ -31,7 +31,6 @@ export const stores = mysqlTable("stores", {
 })
 
 export type Store = typeof stores.$inferSelect
-export type NewStore = typeof stores.$inferInsert
 
 export const storesRelations = relations(stores, ({ many }) => ({
   products: many(products),
@@ -87,7 +86,7 @@ export const sides = mysqlTable("sides", {
   createdAt: timestamp("createdAt").defaultNow(),
 })
 
-export type Sides = typeof subcategories.$inferSelect
+export type Sides = typeof sides.$inferSelect
 
 export const sideRelations = relations(sides, ({ one }) => ({
   subcategory: one(subcategories, {
@@ -112,7 +111,6 @@ export const products = mysqlTable("products", {
 })
 
 export type Product = typeof products.$inferSelect
-export type NewProduct = typeof products.$inferInsert
 
 export const productsRelations = relations(products, ({ one, many }) => ({
   store: one(stores, { fields: [products.storeId], references: [stores.id] }),
@@ -153,7 +151,6 @@ export const carts = mysqlTable("carts", {
 })
 
 export type Cart = typeof carts.$inferSelect
-export type NewCart = typeof carts.$inferInsert
 
 export const emailPreferences = mysqlTable("email_preferences", {
   id: serial("id").primaryKey(),
@@ -167,7 +164,6 @@ export const emailPreferences = mysqlTable("email_preferences", {
 })
 
 export type EmailPreference = typeof emailPreferences.$inferSelect
-export type NewEmailPreference = typeof emailPreferences.$inferInsert
 
 // Original source: https://github.com/jackblatch/OneStopShop/blob/main/db/schema.ts
 export const payments = mysqlTable("payments", {
@@ -181,7 +177,6 @@ export const payments = mysqlTable("payments", {
 })
 
 export type Payment = typeof payments.$inferSelect
-export type NewPayment = typeof payments.$inferInsert
 
 export const paymentsRelations = relations(payments, ({ one }) => ({
   store: one(stores, { fields: [payments.storeId], references: [stores.id] }),
@@ -207,7 +202,6 @@ export const orders = mysqlTable("orders", {
 })
 
 export type Order = typeof orders.$inferSelect
-export type NewOrder = typeof orders.$inferInsert
 
 // Original source: https://github.com/jackblatch/OneStopShop/blob/main/db/schema.ts
 export const addresses = mysqlTable("addresses", {
@@ -222,4 +216,3 @@ export const addresses = mysqlTable("addresses", {
 })
 
 export type Address = typeof addresses.$inferSelect
-export type NewAddress = typeof addresses.$inferInsert

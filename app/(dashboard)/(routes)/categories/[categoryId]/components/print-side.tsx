@@ -31,10 +31,10 @@ import {
 } from "@/components/ui/select"
 import { FileDialog } from "@/components/file-dialog"
 
-import { Inputs } from "./add-subcategory-dialog"
+import { InputSubcategory } from "./add-subcategory-dialog"
 
 interface PrintSideProps {
-  form: UseFormReturn<Inputs, any, undefined>
+  form: UseFormReturn<InputSubcategory, any, undefined>
   isUploading: boolean
   isPending: boolean
   index: number

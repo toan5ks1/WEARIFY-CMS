@@ -47,6 +47,15 @@ export async function addSubcategoryAction(
   return result.insertId
 }
 
+export async function getSubcategory(id: number) {
+  return await db.query.subcategories.findFirst({
+    where: eq(subcategories.id, id),
+    with: {
+      sides: true,
+    },
+  })
+}
+
 // export async function updateCategoryAction(
 //   input: z.infer<typeof categorySchema> & {
 //     id: number;
