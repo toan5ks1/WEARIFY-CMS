@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs";
 
-export default async function SetupLayout({
+import Navbar from "@/components/navbar";
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -12,5 +14,10 @@ export default async function SetupLayout({
     redirect("/sign-in");
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }
