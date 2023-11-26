@@ -9,7 +9,7 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { type z } from "zod"
 
-import { defaultSide } from "@/lib/const"
+import { AreaType, defaultSide } from "@/lib/const"
 import { catchError, isArrayOfFile, slugify } from "@/lib/utils"
 import { subcategorySchema } from "@/lib/validations/subcategory"
 import { Button } from "@/components/ui/button"
@@ -56,17 +56,28 @@ export function UpdateSubcategoryDialog({
   const [isPending, startTransition] = React.useTransition()
   const [files, setFiles] = React.useState<FileWithPreview[] | null>(null)
 
-  console.log(data)
   const { isUploading, startUpload } = useUploadThing("productImage")
 
   const form = useForm<InputSubcategory>({
     resolver: zodResolver(subcategorySchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      sides: [defaultSide],
-    },
   })
+
+  React.useEffect(() => {
+    const formValues = {
+      title: data?.title ?? "",
+      description: data?.description ?? "",
+      sides:
+        data?.sides.map((side) => {
+          return {
+            ...side,
+            areaType: side.areaType ?? AreaType[0],
+            mockup: side.mockup ?? undefined,
+            areaImage: side.areaImage ?? undefined,
+          }
+        }) || [],
+    }
+    data && form.reset(formValues)
+  }, [data, form])
 
   function addSide() {
     append(defaultSide)
@@ -152,7 +163,7 @@ export function UpdateSubcategoryDialog({
   }
 
   return (
-    <DialogContent className="scrollbar-hidden no-scrollbar flex max-h-screen flex-col gap-4 overflow-y-scroll sm:max-w-2xl lg:h-[80dvh]">
+    <DialogContent className="scrollbar-hidden no-scrollbar flex max-h-screen flex-col gap-4 overflow-y-scroll sm:max-w-2xl lg:h-[86dvh]">
       <DialogHeader>
         <DialogTitle>Subcategory</DialogTitle>
       </DialogHeader>
