@@ -63,6 +63,17 @@ export function UpdateSubcategoryDialog({
   })
 
   React.useEffect(() => {
+    if (data?.images) {
+      const file = new File([], data.images.name, {
+        type: "image",
+      })
+      const fileWithPreview = Object.assign(file, {
+        preview: data.images.url,
+      })
+
+      setFiles([fileWithPreview])
+    }
+
     const formValues = {
       title: data?.title ?? "",
       description: data?.description ?? "",

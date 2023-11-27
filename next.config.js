@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["res.cloudinary.com"],
+    domains: ["uploadthing.com", "utfs.io"],
   },
   experimental: {
     serverActions: true,
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig
