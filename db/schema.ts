@@ -39,7 +39,7 @@ export const storesRelations = relations(stores, ({ many }) => ({
 
 export const categories = mysqlTable("category", {
   id: serial("id").primaryKey(),
-  title: varchar("title", { length: 191 }).notNull(),
+  title: varchar("title", { length: 191 }).notNull().unique(),
   description: text("description"),
   createdAt: timestamp("createdAt").defaultNow(),
 })

@@ -9,14 +9,6 @@ import { type z } from "zod"
 import type { categorySchema } from "@/lib/validations/category"
 
 export async function addCategoryAction(input: z.infer<typeof categorySchema>) {
-  const categoryWithSameName = await db.query.categories.findFirst({
-    where: eq(categories.title, input.title),
-  })
-
-  if (categoryWithSameName) {
-    throw new Error("Category name already taken.")
-  }
-
   await db.insert(categories).values({
     title: input.title,
     description: input.description,

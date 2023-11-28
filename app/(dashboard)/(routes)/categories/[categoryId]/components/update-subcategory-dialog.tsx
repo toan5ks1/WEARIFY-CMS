@@ -102,11 +102,6 @@ export function UpdateSubcategoryDialog({
   function onSubmit({ sides, ...data }: InputSubcategory) {
     startTransition(async () => {
       try {
-        await checkSubcategoryAction({
-          title: data.title,
-          categoryId,
-        })
-
         const images = isArrayOfFile(data.images)
           ? await startUpload(data.images).then((res) => {
               const formattedImages = res?.map((image) => ({
