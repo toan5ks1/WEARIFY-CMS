@@ -113,6 +113,19 @@ export function getUserEmail(user: User | null) {
   return email
 }
 
+export function dbErrMsg(err: Error) {
+  let errMsg
+  const errorMessageParts = err.message.split("code =")
+
+  if (errorMessageParts.length > 1) {
+    const codeAndDesc = errorMessageParts[1].split("desc =")
+    const errorCode = codeAndDesc[0]?.trim()
+    const errorDesc = codeAndDesc[1]?.trim()
+    errMsg = `${errorCode}: ${errorDesc}`
+  }
+  return errMsg
+}
+
 export function catchError(err: unknown) {
   if (err instanceof z.ZodError) {
     const errors = err.issues.map((issue) => {
@@ -120,7 +133,8 @@ export function catchError(err: unknown) {
     })
     return toast(errors.join("\n"))
   } else if (err instanceof Error) {
-    return toast(err.message)
+    const dbErr = dbErrMsg(err)
+    return toast(dbErr ?? err.message)
   } else {
     return toast("Something went wrong, please try again later.")
   }

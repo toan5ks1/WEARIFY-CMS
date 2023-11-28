@@ -5,7 +5,7 @@ import { DataTable } from "@/components/ui/data-table"
 import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 
-import { AddCategoryDialog } from "./components/category-dialog"
+import { AddCategoryDialog } from "./components/add-category-dialog"
 import { columns } from "./components/columns"
 
 const CategoriesPage = async () => {

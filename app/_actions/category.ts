@@ -22,34 +22,17 @@ export async function updateCategoryAction(
     id: number
   }
 ) {
-  const category = await db.query.categories.findMany({
-    where: or(eq(categories.id, input.id), eq(categories.title, input.title)),
+  const category = await db.query.categories.findFirst({
+    where: eq(categories.id, input.id),
   })
 
-  let msg
-  switch (category.length) {
-    case 0:
-      msg = "Category not found"
-      break
-    case 1:
-      if (category[0].id !== input.id) {
-        msg = "Category not found"
-      }
-      break
-    case 2:
-      msg = "Category name already taken"
-      break
-    default:
-      break
-  }
-
-  if (msg) {
-    throw new Error(msg)
+  if (!category) {
+    throw new Error("Category not found!")
   }
 
   await db.update(categories).set(input).where(eq(categories.id, input.id))
 
-  revalidatePath("/categories")
+  revalidatePath(`/categories/${input.id}`)
 }
 
 export async function deleteCategoryAction({ id }: { id: number }) {
