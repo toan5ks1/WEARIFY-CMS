@@ -2,7 +2,7 @@
 
 import React from "react"
 import Image from "next/image"
-import { FileWithPreview } from "@/types"
+import { FileWithPreview, StoredFile } from "@/types"
 import { type UseFormReturn } from "react-hook-form"
 
 import { AreaType } from "@/lib/const"
@@ -57,6 +57,40 @@ export default function PrintSide({
     : AreaType[0]
 
   const [areaType, setAreaType] = React.useState<string>(areaTypeDefault)
+
+  React.useEffect(() => {
+    if (
+      form.formState.defaultValues?.sides &&
+      form.formState.defaultValues?.sides[index]?.mockup
+    ) {
+      const mockup = form.formState.defaultValues?.sides[index]
+        ?.mockup! as StoredFile
+      const file = new File([], mockup.name, {
+        type: "image",
+      })
+      const fileWithPreview = Object.assign(file, {
+        preview: mockup.url,
+      })
+
+      setSideMockups([fileWithPreview])
+    }
+    if (
+      form.formState.defaultValues?.sides &&
+      form.formState.defaultValues?.sides[index]?.areaImage
+    ) {
+      const areaImage = form.formState.defaultValues?.sides[index]
+        ?.areaImage! as StoredFile
+      const file = new File([], areaImage.name, {
+        type: "image",
+      })
+      const fileWithPreview = Object.assign(file, {
+        preview: areaImage.url,
+      })
+
+      setSideMockups([fileWithPreview])
+    }
+  }, [])
+
   function changeAreaType(
     onChange: (
       event: "image" | "dimension" | React.ChangeEvent<Element>

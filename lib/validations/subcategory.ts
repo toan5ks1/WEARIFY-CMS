@@ -25,7 +25,7 @@ export const subcategorySchema = z.object({
         title: z.string().min(1, {
           message: "Must be at least 1 character",
         }),
-        description: z.string().optional(),
+        description: z.string().nullable(),
         subcategoryId: z.number().optional().nullable().default(null),
         mockup: z
           .unknown()
