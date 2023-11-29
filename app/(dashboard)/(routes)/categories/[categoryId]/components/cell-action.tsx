@@ -88,7 +88,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuContent>
         <UpdateSubcategoryDialog
           categoryId={data.categoryId}
-          data={subcategory}
+          subcategory={subcategory}
         />
       </DropdownMenu>
     </Dialog>

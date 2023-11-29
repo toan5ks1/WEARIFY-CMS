@@ -1,4 +1,5 @@
 import { env } from "@/env.mjs"
+import { StoredFile } from "@/types"
 import { isClerkAPIResponseError } from "@clerk/nextjs"
 import type { User } from "@clerk/nextjs/server"
 import { clsx, type ClassValue } from "clsx"
@@ -172,4 +173,31 @@ export const formatter = new Intl.NumberFormat("en-US", {
 
 export const nanToNull = (value: any) => {
   return value && value !== "" ? parseInt(value) : 0
+}
+
+export function isImageDirty(newImg: File | null, oldImg: StoredFile | null) {
+  if (!newImg && !oldImg) {
+    return false
+  } else if (newImg && oldImg) {
+    return newImg.name !== oldImg.name
+  }
+
+  return true
+}
+
+export function willUploadImage(
+  newImg: File | null,
+  oldImg: StoredFile | null
+) {
+  if (!newImg) {
+    return false
+  } else if (!oldImg) {
+    return true
+  }
+
+  return newImg.name !== oldImg.name
+}
+
+export function isEmptyObject(obj: Record<string, any>): boolean {
+  return Object.keys(obj).length === 0
 }

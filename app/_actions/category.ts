@@ -5,7 +5,6 @@ import { db } from "@/db"
 import { categories } from "@/db/schema"
 import { InputCategory, InputUpdateCategory } from "@/types"
 import { eq, or } from "drizzle-orm"
-import { type z } from "zod"
 
 export async function addCategoryAction(input: InputCategory) {
   await db.insert(categories).values({
@@ -18,7 +17,7 @@ export async function addCategoryAction(input: InputCategory) {
 
 export async function updateCategoryAction(input: InputUpdateCategory) {
   const category = await db.query.categories.findMany({
-    where: or(eq(categories.id, input.id), eq(categories.title, input.title)),
+    where: eq(categories.id, input.id),
   })
 
   if (!category) {

@@ -8,7 +8,6 @@ import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { Plus } from "lucide-react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { type z } from "zod"
 
 import { defaultSide } from "@/lib/const"
 import { catchError, isArrayOfFile, slugify } from "@/lib/utils"
@@ -38,7 +37,7 @@ import { Icons } from "@/components/icons"
 import { addSideAction } from "@/app/_actions/side"
 import {
   addSubcategoryAction,
-  checkSubcategoryAction,
+  checkAddSubcategoryAction,
 } from "@/app/_actions/subcategory"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
@@ -79,7 +78,7 @@ export function AddSubcategoryDialog({
   function onSubmit({ sides, ...data }: InputSubcategory) {
     startTransition(async () => {
       try {
-        await checkSubcategoryAction({
+        await checkAddSubcategoryAction({
           title: data.title,
           categoryId,
         })

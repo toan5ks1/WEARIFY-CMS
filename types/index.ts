@@ -95,3 +95,8 @@ export interface InputUpdateCategory extends z.infer<typeof categorySchema> {
 export interface InputSubcategory extends z.infer<typeof subcategorySchema> {
   id?: number
 }
+
+export interface InputUpdateSubcategory
+  extends z.infer<typeof subcategorySchema> {
+  id: number
+}

@@ -2,15 +2,21 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { FileWithPreview, InputSubcategory, Side } from "@/types"
+import { FileWithPreview, InputSubcategory } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { type z } from "zod"
 
 import { AreaType, defaultSide } from "@/lib/const"
-import { catchError, isArrayOfFile, slugify } from "@/lib/utils"
+import {
+  catchError,
+  isArrayOfFile,
+  isEmptyObject,
+  isImageDirty,
+  slugify,
+  willUploadImage,
+} from "@/lib/utils"
 import { subcategorySchema } from "@/lib/validations/subcategory"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,8 +40,8 @@ import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
 import { addSideAction } from "@/app/_actions/side"
 import {
-  addSubcategoryAction,
-  checkSubcategoryAction,
+  checkUpdateSubcategoryAction,
+  updateSubcategoryAction,
 } from "@/app/_actions/subcategory"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
@@ -45,12 +51,12 @@ import PrintSide from "./print-side"
 const { useUploadThing } = generateReactHelpers<OurFileRouter>()
 interface UpdateSubcategoryDialogProps {
   categoryId: number
-  data?: SubcategoryWithSides
+  subcategory?: SubcategoryWithSides
 }
 
 export function UpdateSubcategoryDialog({
   categoryId,
-  data,
+  subcategory,
 }: UpdateSubcategoryDialogProps) {
   const [isPending, startTransition] = React.useTransition()
   const [files, setFiles] = React.useState<FileWithPreview[] | null>(null)
@@ -62,22 +68,22 @@ export function UpdateSubcategoryDialog({
   })
 
   React.useEffect(() => {
-    if (data?.images) {
-      const file = new File([], data.images.name, {
+    if (subcategory?.images) {
+      const file = new File([], subcategory.images.name, {
         type: "image",
       })
       const fileWithPreview = Object.assign(file, {
-        preview: data.images.url,
+        preview: subcategory.images.url,
       })
 
       setFiles([fileWithPreview])
     }
 
     const formValues = {
-      title: data?.title ?? "",
-      description: data?.description ?? "",
+      title: subcategory?.title ?? "",
+      description: subcategory?.description ?? "",
       sides:
-        data?.sides.map((side) => {
+        subcategory?.sides.map((side) => {
           return {
             ...side,
             areaType: side.areaType ?? AreaType[0],
@@ -86,8 +92,8 @@ export function UpdateSubcategoryDialog({
           }
         }) || [],
     }
-    data && form.reset(formValues)
-  }, [data, form])
+    subcategory && form.reset(formValues)
+  }, [subcategory, form])
 
   function addSide() {
     append(defaultSide)
@@ -99,16 +105,28 @@ export function UpdateSubcategoryDialog({
   })
 
   function onSubmit({ sides, ...data }: InputSubcategory) {
+    if (!subcategory?.id) {
+      return catchError(null)
+    }
+
     startTransition(async () => {
       try {
-        await checkSubcategoryAction({
-          id: data.id,
+        await checkUpdateSubcategoryAction({
+          id: subcategory.id!,
           title: data.title,
           categoryId,
         })
 
-        const images = isArrayOfFile(data.images)
-          ? await startUpload(data.images).then((res) => {
+        const dataImg = isArrayOfFile(data.images) ? data.images[0] : null
+
+        const isFormDirty =
+          !isEmptyObject(form.formState.dirtyFields) ||
+          isImageDirty(dataImg, subcategory.images)
+
+        const willUploadImg = willUploadImage(dataImg, subcategory.images)
+
+        const images = willUploadImg
+          ? await startUpload(data.images as File[]).then((res) => {
               const formattedImages = res?.map((image) => ({
                 id: image.key,
                 name: image.key.split("_")[1] ?? image.key,
@@ -116,57 +134,58 @@ export function UpdateSubcategoryDialog({
               }))
               return formattedImages ? formattedImages[0] : null
             })
+          : dataImg // has data
+          ? subcategory.images
           : null
 
-        const subcategoryId = await addSubcategoryAction({
-          ...data,
-          images,
-          categoryId,
-          slug: slugify(data.title),
-        })
+        if (isFormDirty) {
+          await updateSubcategoryAction({
+            ...data,
+            id: subcategory.id,
+            images,
+            categoryId,
+            slug: slugify(data.title),
+          })
+        }
 
-        const sidesMapped = sides?.length
-          ? ((await Promise.all(
-              sides.map(async (side) => {
-                const mockup = isArrayOfFile(side.mockup)
-                  ? await startUpload(side.mockup).then((res) => {
-                      const formattedImages = res?.map((image) => ({
-                        id: image.key,
-                        name: image.key.split("_")[1] ?? image.key,
-                        url: image.url,
-                      }))
+        // const sidesMapped = sides?.length
+        //   ? ((await Promise.all(
+        //       sides.map(async (side) => {
+        //         const mockup = isArrayOfFile(side.mockup)
+        //           ? await startUpload(side.mockup).then((res) => {
+        //               const formattedImages = res?.map((image) => ({
+        //                 id: image.key,
+        //                 name: image.key.split("_")[1] ?? image.key,
+        //                 url: image.url,
+        //               }))
 
-                      return formattedImages ? formattedImages[0] : null
-                    })
-                  : null
+        //               return formattedImages ? formattedImages[0] : null
+        //             })
+        //           : null
 
-                const areaImage = isArrayOfFile(side.areaImage)
-                  ? await startUpload(side.areaImage).then((res) => {
-                      const formattedImages = res?.map((image) => ({
-                        id: image.key,
-                        name: image.key.split("_")[1] ?? image.key,
-                        url: image.url,
-                      }))
+        //         const areaImage = isArrayOfFile(side.areaImage)
+        //           ? await startUpload(side.areaImage).then((res) => {
+        //               const formattedImages = res?.map((image) => ({
+        //                 id: image.key,
+        //                 name: image.key.split("_")[1] ?? image.key,
+        //                 url: image.url,
+        //               }))
 
-                      return formattedImages ? formattedImages[0] : null
-                    })
-                  : null
+        //               return formattedImages ? formattedImages[0] : null
+        //             })
+        //           : null
 
-                side.subcategoryId = Number(subcategoryId)
-                side.mockup = mockup
-                side.areaImage = areaImage
+        //         side.subcategoryId = data.id!
+        //         side.mockup = mockup
+        //         side.areaImage = areaImage
 
-                return side
-              })
-            )) as Side[])
-          : null
+        //         return side
+        //       })
+        //     )) as Side[])
+        //   : null
 
-        sidesMapped && (await addSideAction(sidesMapped))
-
-        toast.success("Subcategory added successfully.")
-
-        form.reset()
-        setFiles(null)
+        //sidesMapped && (await addSideAction(sidesMapped))
+        toast.success("Subcategory updated successfully.")
       } catch (err) {
         catchError(err)
       }
