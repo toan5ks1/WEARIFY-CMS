@@ -21,7 +21,6 @@ import {
   getSubcategory,
 } from "@/app/_actions/subcategory"
 
-import { InputSubcategory } from "./add-subcategory-dialog"
 import { SubcategoryColumn } from "./columns"
 import { UpdateSubcategoryDialog } from "./update-subcategory-dialog"
 

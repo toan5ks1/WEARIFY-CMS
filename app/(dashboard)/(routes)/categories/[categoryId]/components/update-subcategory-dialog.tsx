@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { FileWithPreview, Side } from "@/types"
+import { FileWithPreview, InputSubcategory, Side } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -39,7 +39,6 @@ import {
 } from "@/app/_actions/subcategory"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
-import { InputSubcategory } from "./add-subcategory-dialog"
 import { SubcategoryWithSides } from "./cell-action"
 import PrintSide from "./print-side"
 
@@ -102,6 +101,12 @@ export function UpdateSubcategoryDialog({
   function onSubmit({ sides, ...data }: InputSubcategory) {
     startTransition(async () => {
       try {
+        await checkSubcategoryAction({
+          id: data.id,
+          title: data.title,
+          categoryId,
+        })
+
         const images = isArrayOfFile(data.images)
           ? await startUpload(data.images).then((res) => {
               const formattedImages = res?.map((image) => ({

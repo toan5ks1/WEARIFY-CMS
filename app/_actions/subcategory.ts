@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { sides, subcategories } from "@/db/schema"
-import { StoredFile } from "@/types"
+import { InputSubcategory, StoredFile } from "@/types"
 import { and, eq, not, or } from "drizzle-orm"
 import { type z } from "zod"
 
@@ -35,7 +35,7 @@ export async function checkSubcategoryAction(input: {
 }
 
 export async function addSubcategoryAction(
-  input: Omit<z.infer<typeof subcategorySchema>, "sides"> & {
+  input: Omit<InputSubcategory, "sides"> & {
     categoryId: number
     images: StoredFile | null
   }
@@ -56,40 +56,42 @@ export async function getSubcategory(id: number) {
   })
 }
 
-// export async function updateCategoryAction(
-//   input: z.infer<typeof categorySchema> & {
-//     id: number;
-//   }
-// ) {
-//   const category = await db.query.categories.findMany({
-//     where: or(eq(categories.id, input.id), eq(categories.title, input.title)),
-//   });
+export async function updateSubcategoryAction(
+  input: Omit<InputSubcategory, "sides"> & {
+    categoryId: number
+    images: StoredFile | null
+  }
+) {
+  // await checkSubcategoryAction({id: input.id, title: input.title, categoryId: input.categoryId });
+  const category = await db.query.categories.findMany({
+    where: or(eq(categories.id, input.id), eq(categories.title, input.title)),
+  })
 
-//   let msg;
-//   switch(category.length){
-//     case 0:
-//       msg = "Category not found"
-//       break;
-//     case 1:
-//       if(category[0].id !== input.id) {
-//         msg = "Category not found"
-//       }
-//       break;
-//     case 2:
-//       msg = "Category name already taken"
-//       break;
-//     default:
-//       break;
-//   }
+  let msg
+  switch (category.length) {
+    case 0:
+      msg = "Category not found"
+      break
+    case 1:
+      if (category[0].id !== input.id) {
+        msg = "Category not found"
+      }
+      break
+    case 2:
+      msg = "Category name already taken"
+      break
+    default:
+      break
+  }
 
-//   if (msg) {
-//     throw new Error(msg)
-//   }
+  if (msg) {
+    throw new Error(msg)
+  }
 
-//   await db.update(categories).set(input).where(eq(categories.id, input.id));
+  await db.update(categories).set(input).where(eq(categories.id, input.id))
 
-//   revalidatePath("/categories");
-// }
+  revalidatePath("/categories")
+}
 
 export async function deleteSubcategoryAction({
   id,

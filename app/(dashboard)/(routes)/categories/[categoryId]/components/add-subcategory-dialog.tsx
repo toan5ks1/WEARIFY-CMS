@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { FileWithPreview, Side } from "@/types"
+import { FileWithPreview, InputSubcategory, Side } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { Plus } from "lucide-react"
@@ -43,8 +43,6 @@ import {
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
 import PrintSide from "./print-side"
-
-export type InputSubcategory = z.infer<typeof subcategorySchema>
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>()
 

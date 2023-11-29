@@ -2,7 +2,7 @@
 
 import React from "react"
 import Image from "next/image"
-import { FileWithPreview, StoredFile } from "@/types"
+import { FileWithPreview, InputSubcategory, StoredFile } from "@/types"
 import { type UseFormReturn } from "react-hook-form"
 
 import { AreaType } from "@/lib/const"
@@ -30,8 +30,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { FileDialog } from "@/components/file-dialog"
-
-import { InputSubcategory } from "./add-subcategory-dialog"
 
 interface PrintSideProps {
   form: UseFormReturn<InputSubcategory, any, undefined>
