@@ -3,11 +3,12 @@ import { type FileWithPath } from "react-dropzone"
 import type Stripe from "stripe"
 import { z } from "zod"
 
-import { AreaType } from "@/lib/const"
 import {
   type cartItemSchema,
   type checkoutItemSchema,
 } from "@/lib/validations/cart"
+import { categorySchema } from "@/lib/validations/category"
+import { subcategorySchema } from "@/lib/validations/subcategory"
 
 export interface Option {
   label: string
@@ -83,4 +84,14 @@ export interface Side {
   subcategoryId: number
   mockup: StoredFile | null
   areaImage: StoredFile | null
+}
+
+export interface InputCategory extends z.infer<typeof categorySchema> {}
+
+export interface InputUpdateCategory extends z.infer<typeof categorySchema> {
+  id: number
+}
+
+export interface InputSubcategory extends z.infer<typeof subcategorySchema> {
+  id?: number
 }

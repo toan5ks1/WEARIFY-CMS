@@ -10,7 +10,6 @@ import { columns } from "./components/columns"
 
 const CategoriesPage = async () => {
   const allCategories = await db.query.categories.findMany({
-    // orderBy: [asc(categories.title)],
     with: {
       subcategories: {
         columns: {

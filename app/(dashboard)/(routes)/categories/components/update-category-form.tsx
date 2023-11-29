@@ -3,10 +3,10 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Category } from "@/db/schema"
+import { InputUpdateCategory } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { type z } from "zod"
 
 import { catchError } from "@/lib/utils"
 import { categorySchema } from "@/lib/validations/category"
@@ -26,10 +26,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Icons } from "@/components/icons"
 import { updateCategoryAction } from "@/app/_actions/category"
 
-type Inputs = z.infer<typeof categorySchema> & {
-  id: number
-}
-
 interface CategoryClientProps {
   category: Category
 }
@@ -37,7 +33,7 @@ interface CategoryClientProps {
 export function UpdateCategoryForm({ category }: CategoryClientProps) {
   const [isPending, startTransition] = React.useTransition()
 
-  const form = useForm<Inputs>({
+  const form = useForm<InputUpdateCategory>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       title: category.title,
@@ -45,7 +41,7 @@ export function UpdateCategoryForm({ category }: CategoryClientProps) {
     },
   })
 
-  function onSubmit(data: Inputs) {
+  function onSubmit(data: InputUpdateCategory) {
     startTransition(async () => {
       try {
         await updateCategoryAction({ ...data, id: category.id })

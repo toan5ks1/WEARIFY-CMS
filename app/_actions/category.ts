@@ -3,12 +3,11 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { categories } from "@/db/schema"
+import { InputCategory, InputUpdateCategory } from "@/types"
 import { eq, or } from "drizzle-orm"
 import { type z } from "zod"
 
-import type { categorySchema } from "@/lib/validations/category"
-
-export async function addCategoryAction(input: z.infer<typeof categorySchema>) {
+export async function addCategoryAction(input: InputCategory) {
   await db.insert(categories).values({
     title: input.title,
     description: input.description,
@@ -17,13 +16,9 @@ export async function addCategoryAction(input: z.infer<typeof categorySchema>) {
   revalidatePath("/categories")
 }
 
-export async function updateCategoryAction(
-  input: z.infer<typeof categorySchema> & {
-    id: number
-  }
-) {
-  const category = await db.query.categories.findFirst({
-    where: eq(categories.id, input.id),
+export async function updateCategoryAction(input: InputUpdateCategory) {
+  const category = await db.query.categories.findMany({
+    where: or(eq(categories.id, input.id), eq(categories.title, input.title)),
   })
 
   if (!category) {
@@ -51,7 +46,7 @@ export async function deleteCategoryAction({ id }: { id: number }) {
   })
 
   if (!category) {
-    throw new Error("Store not found")
+    throw new Error("Category not found")
   }
 
   if (category.subcategories.length) {
