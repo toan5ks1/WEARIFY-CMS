@@ -2,7 +2,7 @@
 
 import React from "react"
 import Image from "next/image"
-import { FileWithPreview, InputSubcategory, StoredFile } from "@/types"
+import { FileWithPreview, InputSideWrapper, StoredFile } from "@/types"
 import { type UseFormReturn } from "react-hook-form"
 
 import { AreaType } from "@/lib/const"
@@ -32,7 +32,7 @@ import {
 import { FileDialog } from "@/components/file-dialog"
 
 interface PrintSideProps {
-  form: UseFormReturn<InputSubcategory, any, undefined>
+  form: UseFormReturn<InputSideWrapper, any, undefined>
   isUploading: boolean
   isPending: boolean
   index: number

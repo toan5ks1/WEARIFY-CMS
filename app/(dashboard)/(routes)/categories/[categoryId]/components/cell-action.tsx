@@ -18,7 +18,7 @@ import {
 import { AlertModal } from "@/components/modals/alert-modal"
 import {
   deleteSubcategoryAction,
-  getSubcategory,
+  getSubcategoryAction,
 } from "@/app/_actions/subcategory"
 
 import { SubcategoryColumn } from "./columns"
@@ -38,7 +38,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   >(undefined)
 
   const onUpdateFormOpen = async (subcategoryId: number) => {
-    const subcategory = await getSubcategory(subcategoryId)
+    const subcategory = await getSubcategoryAction(subcategoryId)
 
     setSubcategory(subcategory)
   }

@@ -8,7 +8,7 @@ import {
   type checkoutItemSchema,
 } from "@/lib/validations/cart"
 import { categorySchema } from "@/lib/validations/category"
-import { subcategorySchema } from "@/lib/validations/subcategory"
+import { sideSchema, subcategorySchema } from "@/lib/validations/subcategory"
 
 export interface Option {
   label: string
@@ -98,5 +98,17 @@ export interface InputSubcategory extends z.infer<typeof subcategorySchema> {
 
 export interface InputUpdateSubcategory
   extends z.infer<typeof subcategorySchema> {
+  id: number
+}
+
+export interface InputSide extends z.infer<typeof sideSchema> {
+  id?: number
+}
+
+export interface InputSideWrapper {
+  sides: Array<InputSide>
+}
+
+export interface UpdateSide extends Side {
   id: number
 }

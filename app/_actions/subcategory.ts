@@ -55,7 +55,7 @@ export async function addSubcategoryAction(
   return result.insertId
 }
 
-export async function getSubcategory(id: number) {
+export async function getSubcategoryAction(id: number) {
   return await db.query.subcategories.findFirst({
     where: eq(subcategories.id, id),
     with: {

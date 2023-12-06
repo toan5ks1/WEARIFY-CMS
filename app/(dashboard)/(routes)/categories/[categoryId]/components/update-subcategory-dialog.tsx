@@ -2,7 +2,14 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { FileWithPreview, InputSubcategory } from "@/types"
+import {
+  FileWithPreview,
+  InputSide,
+  InputSideWrapper,
+  InputSubcategory,
+  Side,
+  UpdateSide,
+} from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -11,13 +18,13 @@ import { toast } from "sonner"
 import { AreaType, defaultSide } from "@/lib/const"
 import {
   catchError,
+  getImageToCreate,
+  getImageToUpdate,
   isArrayOfFile,
   isEmptyObject,
-  isImageDirty,
   slugify,
-  willUploadImage,
 } from "@/lib/utils"
-import { subcategorySchema } from "@/lib/validations/subcategory"
+import { sideSchema, subcategorySchema } from "@/lib/validations/subcategory"
 import { Button } from "@/components/ui/button"
 import {
   DialogContent,
@@ -38,7 +45,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
-import { addSideAction } from "@/app/_actions/side"
+import { addSideAction, updateSideAction } from "@/app/_actions/side"
 import {
   checkUpdateSubcategoryAction,
   updateSubcategoryAction,
@@ -63,8 +70,12 @@ export function UpdateSubcategoryDialog({
 
   const { isUploading, startUpload } = useUploadThing("productImage")
 
-  const form = useForm<InputSubcategory>({
+  const subcategoryForm = useForm<InputSubcategory>({
     resolver: zodResolver(subcategorySchema),
+  })
+
+  const sideForm = useForm<InputSideWrapper>({
+    resolver: zodResolver(sideSchema),
   })
 
   React.useEffect(() => {
@@ -79,9 +90,12 @@ export function UpdateSubcategoryDialog({
       setFiles([fileWithPreview])
     }
 
-    const formValues = {
-      title: subcategory?.title ?? "",
-      description: subcategory?.description ?? "",
+    const subcategoryValues = {
+      title: subcategory?.title ?? undefined,
+      description: subcategory?.description ?? undefined,
+    }
+
+    const sideValue = {
       sides:
         subcategory?.sides.map((side) => {
           return {
@@ -92,8 +106,10 @@ export function UpdateSubcategoryDialog({
           }
         }) || [],
     }
-    subcategory && form.reset(formValues)
-  }, [subcategory, form])
+
+    subcategoryValues && subcategoryForm.reset(subcategoryValues)
+    sideValue && sideForm.reset(sideValue)
+  }, [sideForm, subcategory, subcategoryForm])
 
   function addSide() {
     append(defaultSide)
@@ -101,10 +117,10 @@ export function UpdateSubcategoryDialog({
 
   const { fields, append } = useFieldArray({
     name: "sides",
-    control: form.control,
+    control: sideForm.control,
   })
 
-  function onSubmit({ sides, ...data }: InputSubcategory) {
+  function onSubmit(data: InputSubcategory) {
     if (!subcategory?.id) {
       return catchError(null)
     }
@@ -117,28 +133,16 @@ export function UpdateSubcategoryDialog({
           categoryId,
         })
 
-        const dataImg = isArrayOfFile(data.images) ? data.images[0] : null
+        const { images, isImageDirty } = await getImageToUpdate(
+          data.images,
+          subcategory.images,
+          startUpload
+        )
 
-        const isFormDirty =
-          !isEmptyObject(form.formState.dirtyFields) ||
-          isImageDirty(dataImg, subcategory.images)
-
-        const willUploadImg = willUploadImage(dataImg, subcategory.images)
-
-        const images = willUploadImg
-          ? await startUpload(data.images as File[]).then((res) => {
-              const formattedImages = res?.map((image) => ({
-                id: image.key,
-                name: image.key.split("_")[1] ?? image.key,
-                url: image.url,
-              }))
-              return formattedImages ? formattedImages[0] : null
-            })
-          : dataImg // has data
-          ? subcategory.images
-          : null
-
-        if (isFormDirty) {
+        if (
+          !isEmptyObject(subcategoryForm.formState.dirtyFields) ||
+          isImageDirty
+        ) {
           await updateSubcategoryAction({
             ...data,
             id: subcategory.id,
@@ -148,43 +152,42 @@ export function UpdateSubcategoryDialog({
           })
         }
 
-        // const sidesMapped = sides?.length
-        //   ? ((await Promise.all(
-        //       sides.map(async (side) => {
-        //         const mockup = isArrayOfFile(side.mockup)
-        //           ? await startUpload(side.mockup).then((res) => {
-        //               const formattedImages = res?.map((image) => ({
-        //                 id: image.key,
-        //                 name: image.key.split("_")[1] ?? image.key,
-        //                 url: image.url,
-        //               }))
+        const { sides } = sideForm.getValues()
 
-        //               return formattedImages ? formattedImages[0] : null
-        //             })
-        //           : null
+        // Update side
+        sides
+          .filter((side) => side.id)
+          .forEach(async (side) => {
+            const { images: mockup, isImageDirty: isMockupDirty } =
+              await getImageToUpdate(
+                side.mockup,
+                subcategory.sides.mockup,
+                startUpload
+              )
+            await updateSideAction(side as UpdateSide)
+          })
 
-        //         const areaImage = isArrayOfFile(side.areaImage)
-        //           ? await startUpload(side.areaImage).then((res) => {
-        //               const formattedImages = res?.map((image) => ({
-        //                 id: image.key,
-        //                 name: image.key.split("_")[1] ?? image.key,
-        //                 url: image.url,
-        //               }))
+        const sidesWillAdd = sides.filter((side) => !side.id)
 
-        //               return formattedImages ? formattedImages[0] : null
-        //             })
-        //           : null
+        const sidesWillAddMapped = (await Promise.all(
+          sidesWillAdd.map(async (side) => {
+            const mockup = await getImageToCreate(side.mockup, startUpload)
+            const areaImage = await getImageToCreate(
+              side.areaImage,
+              startUpload
+            )
 
-        //         side.subcategoryId = data.id!
-        //         side.mockup = mockup
-        //         side.areaImage = areaImage
+            side.subcategoryId = Number(subcategory.id)
+            side.mockup = mockup
+            side.areaImage = areaImage
 
-        //         return side
-        //       })
-        //     )) as Side[])
-        //   : null
+            return side
+          })
+        )) as Side[]
 
-        //sidesMapped && (await addSideAction(sidesMapped))
+        console.log(sidesWillAddMapped)
+        // Add side
+        sidesWillAddMapped.length && (await addSideAction(sidesWillAddMapped))
         toast.success("Subcategory updated successfully.")
       } catch (err) {
         catchError(err)
@@ -197,13 +200,15 @@ export function UpdateSubcategoryDialog({
       <DialogHeader>
         <DialogTitle>Subcategory</DialogTitle>
       </DialogHeader>
-      <Form {...form}>
+      <Form {...subcategoryForm}>
         <form
           className="grid w-full gap-5 px-1"
-          onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
+          onSubmit={(...args) =>
+            void subcategoryForm.handleSubmit(onSubmit)(...args)
+          }
         >
           <FormField
-            control={form.control}
+            control={subcategoryForm.control}
             name="title"
             render={({ field }) => (
               <FormItem>
@@ -216,7 +221,7 @@ export function UpdateSubcategoryDialog({
             )}
           />
           <FormField
-            control={form.control}
+            control={subcategoryForm.control}
             name="description"
             render={({ field }) => (
               <FormItem>
@@ -244,7 +249,7 @@ export function UpdateSubcategoryDialog({
             ) : null}
             <FormControl>
               <FileDialog
-                setValue={form.setValue}
+                setValue={subcategoryForm.setValue}
                 name="images"
                 maxFiles={1}
                 maxSize={1024 * 1024 * 4}
@@ -255,7 +260,7 @@ export function UpdateSubcategoryDialog({
               />
             </FormControl>
             <UncontrolledFormMessage
-              message={form.formState.errors.images?.message}
+              message={subcategoryForm.formState.errors.images?.message}
             />
           </FormItem>
           <FormLabel className="font-semibold">Print sides</FormLabel>
@@ -264,7 +269,7 @@ export function UpdateSubcategoryDialog({
               <PrintSide
                 key={index}
                 index={index}
-                form={form}
+                form={sideForm}
                 isPending={isPending}
                 isUploading={isUploading}
               />

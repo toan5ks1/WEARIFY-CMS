@@ -1,7 +1,6 @@
 "use client"
 
 import { Subcategory } from "@/db/schema"
-import { Side } from "@/types"
 import { ColumnDef } from "@tanstack/react-table"
 import { format } from "date-fns"
 

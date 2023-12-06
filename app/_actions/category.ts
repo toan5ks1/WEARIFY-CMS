@@ -16,7 +16,7 @@ export async function addCategoryAction(input: InputCategory) {
 }
 
 export async function updateCategoryAction(input: InputUpdateCategory) {
-  const category = await db.query.categories.findMany({
+  const category = await db.query.categories.findFirst({
     where: eq(categories.id, input.id),
   })
 

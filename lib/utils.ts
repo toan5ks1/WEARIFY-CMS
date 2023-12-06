@@ -5,6 +5,7 @@ import type { User } from "@clerk/nextjs/server"
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner"
 import { twMerge } from "tailwind-merge"
+import { UploadFileResponse } from "uploadthing/client"
 import * as z from "zod"
 
 export function formatPrice(
@@ -175,6 +176,16 @@ export const nanToNull = (value: any) => {
   return value && value !== "" ? parseInt(value) : 0
 }
 
+export function isEmptyObject(obj: Record<string, any>): boolean {
+  return Object.keys(obj).length === 0
+}
+
+/**
+ *
+ * @param newImg image mapped from form
+ * @param oldImg image fetched
+ * @returns
+ */
 export function isImageDirty(newImg: File | null, oldImg: StoredFile | null) {
   if (!newImg && !oldImg) {
     return false
@@ -185,6 +196,12 @@ export function isImageDirty(newImg: File | null, oldImg: StoredFile | null) {
   return true
 }
 
+/**
+ *
+ * @param newImg image mapped from form
+ * @param oldImg image fetched
+ * @returns
+ */
 export function willUploadImage(
   newImg: File | null,
   oldImg: StoredFile | null
@@ -198,6 +215,63 @@ export function willUploadImage(
   return newImg.name !== oldImg.name
 }
 
-export function isEmptyObject(obj: Record<string, any>): boolean {
-  return Object.keys(obj).length === 0
+/**
+ *
+ * @param fileImg raw image file from form
+ * @param oldImg image fetched
+ * @param startUpload method from uploadthing client
+ * @returns
+ */
+export async function getImageToUpdate(
+  fileImg: unknown,
+  oldImg: StoredFile | null,
+  startUpload: (
+    files: File[],
+    input?: undefined
+  ) => Promise<UploadFileResponse[] | undefined>
+) {
+  const newImg = isArrayOfFile(fileImg) ? fileImg[0] : null
+  const willUploadImg = willUploadImage(newImg, oldImg)
+
+  const images = willUploadImg
+    ? await startUpload([newImg] as File[]).then((res) => {
+        const formattedImages = res?.map((image) => ({
+          id: image.key,
+          name: image.key.split("_")[1] ?? image.key,
+          url: image.url,
+        }))
+        return formattedImages ? formattedImages[0] : null
+      })
+    : newImg // has data
+    ? oldImg
+    : null
+
+  return { images, isImageDirty: isImageDirty(newImg, oldImg) }
+}
+
+/**
+ *
+ * @param fileImg raw image file from form
+ * @param startUpload method from uploadthing client
+ * @returns
+ */
+export async function getImageToCreate(
+  fileImg: unknown,
+  startUpload: (
+    files: File[],
+    input?: undefined
+  ) => Promise<UploadFileResponse[] | undefined>
+) {
+  const images = isArrayOfFile(fileImg)
+    ? await startUpload(fileImg).then((res) => {
+        const formattedImages = res?.map((image) => ({
+          id: image.key,
+          name: image.key.split("_")[1] ?? image.key,
+          url: image.url,
+        }))
+        return formattedImages ? formattedImages[0] : null
+      })
+    : null
+
+  return images
 }
