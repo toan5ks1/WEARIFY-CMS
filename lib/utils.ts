@@ -224,14 +224,15 @@ export function willUploadImage(
  */
 export async function getImageToUpdate(
   fileImg: unknown,
-  oldImg: StoredFile | null,
   startUpload: (
     files: File[],
     input?: undefined
   ) => Promise<UploadFileResponse[] | undefined>
 ) {
+  console.log(fileImg)
   const newImg = isArrayOfFile(fileImg) ? fileImg[0] : null
-  const willUploadImg = willUploadImage(newImg, oldImg)
+
+  const willUploadImg = newImg?.size != 0
 
   const images = willUploadImg
     ? await startUpload([newImg] as File[]).then((res) => {
@@ -242,11 +243,11 @@ export async function getImageToUpdate(
         }))
         return formattedImages ? formattedImages[0] : null
       })
-    : newImg // has data
-    ? oldImg
-    : null
+    : // : newImg // has data
+      // ? oldImg
+      null
 
-  return { images, isImageDirty: isImageDirty(newImg, oldImg) }
+  return { images, isImageDirty: true } //isImageDirty(newImg, oldImg) }
 }
 
 /**

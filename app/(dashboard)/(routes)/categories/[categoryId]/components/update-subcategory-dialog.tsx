@@ -135,9 +135,10 @@ export function UpdateSubcategoryDialog({
 
         const { images, isImageDirty } = await getImageToUpdate(
           data.images,
-          subcategory.images,
           startUpload
         )
+
+        // console.log("img", data.images)
 
         if (
           !isEmptyObject(subcategoryForm.formState.dirtyFields) ||
@@ -155,17 +156,35 @@ export function UpdateSubcategoryDialog({
         const { sides } = sideForm.getValues()
 
         // Update side
-        sides
-          .filter((side) => side.id)
-          .forEach(async (side) => {
-            const { images: mockup, isImageDirty: isMockupDirty } =
-              await getImageToUpdate(
-                side.mockup,
-                subcategory.sides.mockup,
-                startUpload
-              )
-            await updateSideAction(side as UpdateSide)
-          })
+        await Promise.all(
+          sides
+            .filter((side) => side.id)
+            .map(async (side, index) => {
+              // const { images: mockup, isImageDirty: isMockupDirty } =
+              //   await getImageToUpdate(
+              //     side.mockup,
+              //     subcategory.sides[index].mockup,
+              //     startUpload
+              //   )
+              // const { images: areaImage, isImageDirty: isAreaImageDirty } =
+              //   await getImageToUpdate(
+              //     side.areaImage,
+              //     subcategory.sides[index].areaImage,
+              //     startUpload
+              //   )
+              // if (
+              //   !isEmptyObject(sideForm.formState.dirtyFields) ||
+              //   isMockupDirty ||
+              //   isAreaImageDirty
+              // ) {
+              //   await updateSideAction({
+              //     ...side,
+              //     mockup,
+              //     areaImage,
+              //   } as UpdateSide)
+              // }
+            })
+        )
 
         const sidesWillAdd = sides.filter((side) => !side.id)
 
@@ -185,7 +204,7 @@ export function UpdateSubcategoryDialog({
           })
         )) as Side[]
 
-        console.log(sidesWillAddMapped)
+        // console.log(sidesWillAddMapped)
         // Add side
         sidesWillAddMapped.length && (await addSideAction(sidesWillAddMapped))
         toast.success("Subcategory updated successfully.")
