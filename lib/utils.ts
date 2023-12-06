@@ -176,8 +176,8 @@ export const nanToNull = (value: any) => {
   return value && value !== "" ? parseInt(value) : 0
 }
 
-export function isEmptyObject(obj: Record<string, any>): boolean {
-  return Object.keys(obj).length === 0
+export function isFormDirty(obj: Record<string, any>): boolean {
+  return Object.keys(obj).length > 0
 }
 
 /**
@@ -186,56 +186,28 @@ export function isEmptyObject(obj: Record<string, any>): boolean {
  * @param oldImg image fetched
  * @returns
  */
-export function isImageDirty(newImg: File | null, oldImg: StoredFile | null) {
-  if (!newImg && !oldImg) {
-    return false
-  } else if (newImg && oldImg) {
-    return newImg.name !== oldImg.name
-  }
-
-  return true
-}
-
-/**
- *
- * @param newImg image mapped from form
- * @param oldImg image fetched
- * @returns
- */
-export function willUploadImage(
-  newImg: File | null,
-  oldImg: StoredFile | null
-) {
-  if (!newImg) {
-    return false
-  } else if (!oldImg) {
-    return true
-  }
-
-  return newImg.name !== oldImg.name
+export function isImageDirty(image: unknown) {
+  const newImg = isArrayOfFile(image) ? image[0] : null
+  return newImg?.size !== 0
 }
 
 /**
  *
  * @param fileImg raw image file from form
- * @param oldImg image fetched
+ * @param formImg image fetched
  * @param startUpload method from uploadthing client
  * @returns
  */
 export async function getImageToUpdate(
   fileImg: unknown,
+  formImg: StoredFile | null,
   startUpload: (
     files: File[],
     input?: undefined
   ) => Promise<UploadFileResponse[] | undefined>
 ) {
-  console.log(fileImg)
-  const newImg = isArrayOfFile(fileImg) ? fileImg[0] : null
-
-  const willUploadImg = newImg?.size != 0
-
-  const images = willUploadImg
-    ? await startUpload([newImg] as File[]).then((res) => {
+  const images = isImageDirty(fileImg) // Dirty
+    ? await startUpload(fileImg as File[]).then((res) => {
         const formattedImages = res?.map((image) => ({
           id: image.key,
           name: image.key.split("_")[1] ?? image.key,
@@ -243,11 +215,11 @@ export async function getImageToUpdate(
         }))
         return formattedImages ? formattedImages[0] : null
       })
-    : // : newImg // has data
-      // ? oldImg
-      null
+    : formImg
 
-  return { images, isImageDirty: true } //isImageDirty(newImg, oldImg) }
+  console.log("img", images)
+  console.log("fimg", formImg)
+  return images
 }
 
 /**
@@ -275,4 +247,19 @@ export async function getImageToCreate(
     : null
 
   return images
+}
+
+export function getImageToPreview(image?: StoredFile | null) {
+  if (!image) {
+    return null
+  }
+
+  const file = new File([], image.name, {
+    type: "image",
+  })
+  const fileWithPreview = Object.assign(file, {
+    preview: image.url,
+  })
+
+  return fileWithPreview
 }

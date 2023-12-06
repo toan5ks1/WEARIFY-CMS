@@ -6,7 +6,7 @@ import { FileWithPreview, InputSideWrapper, StoredFile } from "@/types"
 import { type UseFormReturn } from "react-hook-form"
 
 import { AreaType } from "@/lib/const"
-import { nanToNull, toTitleCase } from "@/lib/utils"
+import { getImageToPreview, nanToNull, toTitleCase } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   FormControl,
@@ -57,35 +57,14 @@ export default function PrintSide({
   const [areaType, setAreaType] = React.useState<string>(areaTypeDefault)
 
   React.useEffect(() => {
-    if (
-      form.formState.defaultValues?.sides &&
-      form.formState.defaultValues?.sides[index]?.mockup
-    ) {
-      const mockup = form.formState.defaultValues?.sides[index]
-        ?.mockup! as StoredFile
-      const file = new File([], mockup.name, {
-        type: "image",
-      })
-      const fileWithPreview = Object.assign(file, {
-        preview: mockup.url,
-      })
+    const side = form.formState.defaultValues?.sides?.at(index)
 
-      setSideMockups([fileWithPreview])
-    }
-    if (
-      form.formState.defaultValues?.sides &&
-      form.formState.defaultValues?.sides[index]?.areaImage
-    ) {
-      const areaImage = form.formState.defaultValues?.sides[index]
-        ?.areaImage! as StoredFile
-      const file = new File([], areaImage.name, {
-        type: "image",
-      })
-      const fileWithPreview = Object.assign(file, {
-        preview: areaImage.url,
-      })
+    if (side) {
+      const previewMockup = getImageToPreview(side.mockup as StoredFile)
+      const previewAreaImage = getImageToPreview(side.areaImage as StoredFile)
 
-      setSideMockups([fileWithPreview])
+      previewMockup && setSideMockups([previewMockup])
+      previewAreaImage && setPrintAreas([previewAreaImage])
     }
   }, [])
 

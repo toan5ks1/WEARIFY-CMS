@@ -19,9 +19,10 @@ import { AreaType, defaultSide } from "@/lib/const"
 import {
   catchError,
   getImageToCreate,
+  getImageToPreview,
   getImageToUpdate,
-  isArrayOfFile,
-  isEmptyObject,
+  isFormDirty,
+  isImageDirty,
   slugify,
 } from "@/lib/utils"
 import { sideSchema, subcategorySchema } from "@/lib/validations/subcategory"
@@ -79,17 +80,6 @@ export function UpdateSubcategoryDialog({
   })
 
   React.useEffect(() => {
-    if (subcategory?.images) {
-      const file = new File([], subcategory.images.name, {
-        type: "image",
-      })
-      const fileWithPreview = Object.assign(file, {
-        preview: subcategory.images.url,
-      })
-
-      setFiles([fileWithPreview])
-    }
-
     const subcategoryValues = {
       title: subcategory?.title ?? undefined,
       description: subcategory?.description ?? undefined,
@@ -107,13 +97,12 @@ export function UpdateSubcategoryDialog({
         }) || [],
     }
 
+    const previewImage = getImageToPreview(subcategory?.images)
+
+    previewImage && setFiles([previewImage])
     subcategoryValues && subcategoryForm.reset(subcategoryValues)
     sideValue && sideForm.reset(sideValue)
   }, [sideForm, subcategory, subcategoryForm])
-
-  function addSide() {
-    append(defaultSide)
-  }
 
   const { fields, append } = useFieldArray({
     name: "sides",
@@ -133,21 +122,18 @@ export function UpdateSubcategoryDialog({
           categoryId,
         })
 
-        const { images, isImageDirty } = await getImageToUpdate(
-          data.images,
-          startUpload
-        )
-
-        // console.log("img", data.images)
-
         if (
-          !isEmptyObject(subcategoryForm.formState.dirtyFields) ||
-          isImageDirty
+          isFormDirty(subcategoryForm.formState.dirtyFields) ||
+          isImageDirty(data.images)
         ) {
           await updateSubcategoryAction({
             ...data,
             id: subcategory.id,
-            images,
+            images: await getImageToUpdate(
+              data.images,
+              subcategory.images,
+              startUpload
+            ),
             categoryId,
             slug: slugify(data.title),
           })
@@ -155,58 +141,53 @@ export function UpdateSubcategoryDialog({
 
         const { sides } = sideForm.getValues()
 
-        // Update side
-        await Promise.all(
-          sides
-            .filter((side) => side.id)
-            .map(async (side, index) => {
-              // const { images: mockup, isImageDirty: isMockupDirty } =
-              //   await getImageToUpdate(
-              //     side.mockup,
-              //     subcategory.sides[index].mockup,
-              //     startUpload
-              //   )
-              // const { images: areaImage, isImageDirty: isAreaImageDirty } =
-              //   await getImageToUpdate(
-              //     side.areaImage,
-              //     subcategory.sides[index].areaImage,
-              //     startUpload
-              //   )
-              // if (
-              //   !isEmptyObject(sideForm.formState.dirtyFields) ||
-              //   isMockupDirty ||
-              //   isAreaImageDirty
-              // ) {
-              //   await updateSideAction({
-              //     ...side,
-              //     mockup,
-              //     areaImage,
-              //   } as UpdateSide)
-              // }
+        // Filter new sides and update current sides
+        const sidesWillAdd = (
+          await Promise.all(
+            sides.map(async (side, index) => {
+              if (!side.id) {
+                const mockup = await getImageToCreate(side.mockup, startUpload)
+                const areaImage = await getImageToCreate(
+                  side.areaImage,
+                  startUpload
+                )
+
+                side.subcategoryId = Number(subcategory.id)
+                side.mockup = mockup
+                side.areaImage = areaImage
+              } else {
+                // Update sides
+                const mockup = await getImageToUpdate(
+                  side.mockup,
+                  subcategory.sides[index].mockup,
+                  startUpload
+                )
+                const areaImage = await getImageToUpdate(
+                  side.areaImage,
+                  subcategory.sides[index].areaImage,
+                  startUpload
+                )
+                if (
+                  isFormDirty(sideForm.formState.dirtyFields) ||
+                  isImageDirty(side.mockup) ||
+                  isImageDirty(side.areaImage)
+                ) {
+                  await updateSideAction({
+                    ...side,
+                    mockup,
+                    areaImage,
+                  } as UpdateSide)
+                }
+              }
+
+              return side
             })
-        )
+          )
+        ).filter((side) => !side.id) as Side[]
 
-        const sidesWillAdd = sides.filter((side) => !side.id)
+        // Add new sides
+        sidesWillAdd.length && (await addSideAction(sidesWillAdd))
 
-        const sidesWillAddMapped = (await Promise.all(
-          sidesWillAdd.map(async (side) => {
-            const mockup = await getImageToCreate(side.mockup, startUpload)
-            const areaImage = await getImageToCreate(
-              side.areaImage,
-              startUpload
-            )
-
-            side.subcategoryId = Number(subcategory.id)
-            side.mockup = mockup
-            side.areaImage = areaImage
-
-            return side
-          })
-        )) as Side[]
-
-        // console.log(sidesWillAddMapped)
-        // Add side
-        sidesWillAddMapped.length && (await addSideAction(sidesWillAddMapped))
         toast.success("Subcategory updated successfully.")
       } catch (err) {
         catchError(err)
@@ -299,7 +280,7 @@ export function UpdateSubcategoryDialog({
             variant="outline"
             size="sm"
             className="mt-2"
-            onClick={addSide}
+            onClick={() => append(defaultSide)}
           >
             Add side
           </Button>
