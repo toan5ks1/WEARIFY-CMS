@@ -188,38 +188,7 @@ export function isFormDirty(obj: Record<string, any>): boolean {
  */
 export function isImageDirty(image: unknown) {
   const newImg = isArrayOfFile(image) ? image[0] : null
-  return newImg?.size !== 0
-}
-
-/**
- *
- * @param fileImg raw image file from form
- * @param formImg image fetched
- * @param startUpload method from uploadthing client
- * @returns
- */
-export async function getImageToUpdate(
-  fileImg: unknown,
-  formImg: StoredFile | null,
-  startUpload: (
-    files: File[],
-    input?: undefined
-  ) => Promise<UploadFileResponse[] | undefined>
-) {
-  const images = isImageDirty(fileImg) // Dirty
-    ? await startUpload(fileImg as File[]).then((res) => {
-        const formattedImages = res?.map((image) => ({
-          id: image.key,
-          name: image.key.split("_")[1] ?? image.key,
-          url: image.url,
-        }))
-        return formattedImages ? formattedImages[0] : null
-      })
-    : formImg
-
-  console.log("img", images)
-  console.log("fimg", formImg)
-  return images
+  return newImg ? newImg.size !== 0 : false
 }
 
 /**

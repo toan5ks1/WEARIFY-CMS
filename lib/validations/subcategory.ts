@@ -25,7 +25,7 @@ export const sideSchema = z.object({
   title: z.string().min(1, {
     message: "Must be at least 1 character",
   }),
-  description: z.string().nullable(),
+  description: z.string().optional(),
   subcategoryId: z.number().optional().nullable().default(null),
   mockup: z
     .unknown()

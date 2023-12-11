@@ -83,7 +83,7 @@ export async function updateSubcategoryAction(
     .set(input)
     .where(eq(subcategories.id, input.id))
 
-  revalidatePath("/categories")
+  revalidatePath(`/categories/${input.categoryId}`)
 }
 
 export async function deleteSubcategoryAction({
