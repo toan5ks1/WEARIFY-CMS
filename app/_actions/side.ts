@@ -1,5 +1,6 @@
 "use server"
 
+import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { sides } from "@/db/schema"
 import { Side, UpdateSide } from "@/types"
@@ -19,4 +20,8 @@ export async function updateSideAction(input: UpdateSide) {
   }
 
   await db.update(sides).set(input).where(eq(sides.id, input.id))
+}
+
+export async function revSubcategory(categoryId: number) {
+  revalidatePath(`/categories/${categoryId}`)
 }

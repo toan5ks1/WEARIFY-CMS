@@ -39,7 +39,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
-import { addSideAction } from "@/app/_actions/side"
+import { addSideAction, revSubcategory } from "@/app/_actions/side"
 import {
   addSubcategoryAction,
   checkAddSubcategoryAction,
@@ -72,6 +72,7 @@ export function AddSubcategoryDialog({
 
   const sideForm = useForm<InputSideWrapper>({
     resolver: zodResolver(sideSchema),
+    defaultValues: { sides: [defaultSide] },
   })
 
   function addSide() {
@@ -123,6 +124,7 @@ export function AddSubcategoryDialog({
         setFiles(null)
         sideForm.reset()
         subcategoryForm.reset()
+        revSubcategory(categoryId)
         toast.success("Subcategory added successfully.")
       } catch (err) {
         catchError(err)

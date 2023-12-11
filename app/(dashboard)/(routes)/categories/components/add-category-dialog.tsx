@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { type z } from "zod"
 
 import { catchError } from "@/lib/utils"
 import { categorySchema } from "@/lib/validations/category"

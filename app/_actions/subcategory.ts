@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
-import { categories, sides, subcategories } from "@/db/schema"
+import { sides, subcategories } from "@/db/schema"
 import { InputSubcategory, InputUpdateSubcategory, StoredFile } from "@/types"
-import { and, eq, not, or } from "drizzle-orm"
+import { and, eq, not } from "drizzle-orm"
 
 export async function checkAddSubcategoryAction(input: {
   title: string

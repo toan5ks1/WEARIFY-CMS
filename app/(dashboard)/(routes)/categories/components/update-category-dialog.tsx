@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
 import { Category } from "@/db/schema"
 import { InputUpdateCategory } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -12,6 +11,12 @@ import { catchError } from "@/lib/utils"
 import { categorySchema } from "@/lib/validations/category"
 import { Button } from "@/components/ui/button"
 import {
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import {
   Form,
   FormControl,
   FormField,
@@ -19,9 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Heading } from "@/components/ui/heading"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Icons } from "@/components/icons"
 import { updateCategoryAction } from "@/app/_actions/category"
@@ -30,7 +33,7 @@ interface CategoryClientProps {
   category: Category
 }
 
-export function UpdateCategoryForm({ category }: CategoryClientProps) {
+export function UpdateCategoryDialog({ category }: CategoryClientProps) {
   const [isPending, startTransition] = React.useTransition()
 
   const form = useForm<InputUpdateCategory>({
@@ -54,12 +57,10 @@ export function UpdateCategoryForm({ category }: CategoryClientProps) {
   }
 
   return (
-    <div className="flex flex-col justify-between gap-4">
-      <Heading
-        title={"Update category"}
-        description="Update this category information"
-      />
-      <Separator />
+    <DialogContent className="sm:max-w-[520px]">
+      <DialogHeader>
+        <DialogTitle>Subcategory</DialogTitle>
+      </DialogHeader>
       <Form {...form}>
         <form
           className="grid w-full max-w-2xl gap-5"
@@ -94,18 +95,20 @@ export function UpdateCategoryForm({ category }: CategoryClientProps) {
               </FormItem>
             )}
           />
-          <Button className="w-fit" disabled={isPending}>
-            {isPending && (
-              <Icons.spinner
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-            )}
-            Update Category
-            <span className="sr-only">Update Category</span>
-          </Button>
+          <DialogFooter className="sticky">
+            <Button className="w-fit" disabled={isPending}>
+              {isPending && (
+                <Icons.spinner
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
+              )}
+              Update Category
+              <span className="sr-only">Update Category</span>
+            </Button>
+          </DialogFooter>
         </form>
       </Form>
-    </div>
+    </DialogContent>
   )
 }

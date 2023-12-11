@@ -4,7 +4,13 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { categories } from "@/db/schema"
 import { InputCategory, InputUpdateCategory } from "@/types"
-import { eq, or } from "drizzle-orm"
+import { eq } from "drizzle-orm"
+
+export async function getCategoryAction(id: number) {
+  return await db.query.categories.findFirst({
+    where: eq(categories.id, id),
+  })
+}
 
 export async function addCategoryAction(input: InputCategory) {
   await db.insert(categories).values({
@@ -26,7 +32,7 @@ export async function updateCategoryAction(input: InputUpdateCategory) {
 
   await db.update(categories).set(input).where(eq(categories.id, input.id))
 
-  revalidatePath(`/categories/${input.id}`)
+  revalidatePath("/categories")
 }
 
 export async function deleteCategoryAction({ id }: { id: number }) {

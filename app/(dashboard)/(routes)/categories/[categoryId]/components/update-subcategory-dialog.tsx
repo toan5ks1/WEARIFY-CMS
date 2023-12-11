@@ -1,11 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { revalidatePath } from "next/cache"
 import Image from "next/image"
 import {
   FileWithPreview,
-  InputSide,
   InputSideWrapper,
   InputSubcategory,
   Side,
@@ -46,7 +44,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
-import { addSideAction, updateSideAction } from "@/app/_actions/side"
+import {
+  addSideAction,
+  revSubcategory,
+  updateSideAction,
+} from "@/app/_actions/side"
 import {
   checkUpdateSubcategoryAction,
   updateSubcategoryAction,
@@ -185,7 +187,8 @@ export function UpdateSubcategoryDialog({
 
         // Add new sides
         sidesWillAdd.length && (await addSideAction(sidesWillAdd))
-        revalidatePath(`/categories/${categoryId}`)
+        revSubcategory(categoryId)
+        // revalidatePath(`/categories/${categoryId}`)
         toast.success("Subcategory updated successfully.")
       } catch (err) {
         catchError(err)
