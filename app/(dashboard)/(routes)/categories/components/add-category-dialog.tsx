@@ -1,12 +1,11 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { InputCategory } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Plus } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { type z } from "zod"
 
 import { catchError } from "@/lib/utils"
 import { categorySchema } from "@/lib/validations/category"
@@ -32,12 +31,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Icons } from "@/components/icons"
 import { addCategoryAction } from "@/app/_actions/category"
 
-type Inputs = z.infer<typeof categorySchema>
-
 export function AddCategoryDialog() {
   const [isPending, startTransition] = React.useTransition()
 
-  const form = useForm<Inputs>({
+  const form = useForm<InputCategory>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       title: "",
@@ -45,7 +42,7 @@ export function AddCategoryDialog() {
     },
   })
 
-  function onSubmit(data: Inputs) {
+  function onSubmit(data: InputCategory) {
     startTransition(async () => {
       try {
         await addCategoryAction({ ...data })

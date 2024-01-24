@@ -1,9 +1,11 @@
 import { env } from "@/env.mjs"
+import { StoredFile } from "@/types"
 import { isClerkAPIResponseError } from "@clerk/nextjs"
 import type { User } from "@clerk/nextjs/server"
 import { clsx, type ClassValue } from "clsx"
 import { toast } from "sonner"
 import { twMerge } from "tailwind-merge"
+import { UploadFileResponse } from "uploadthing/client"
 import * as z from "zod"
 
 export function formatPrice(
@@ -113,6 +115,19 @@ export function getUserEmail(user: User | null) {
   return email
 }
 
+export function dbErrMsg(err: Error) {
+  let errMsg
+  const errorMessageParts = err.message.split("code =")
+
+  if (errorMessageParts.length > 1) {
+    const codeAndDesc = errorMessageParts[1].split("desc =")
+    const errorCode = codeAndDesc[0]?.trim()
+    const errorDesc = codeAndDesc[1]?.trim()
+    errMsg = `${errorCode}: ${errorDesc}`
+  }
+  return errMsg
+}
+
 export function catchError(err: unknown) {
   if (err instanceof z.ZodError) {
     const errors = err.issues.map((issue) => {
@@ -120,7 +135,8 @@ export function catchError(err: unknown) {
     })
     return toast(errors.join("\n"))
   } else if (err instanceof Error) {
-    return toast(err.message)
+    const dbErr = dbErrMsg(err)
+    return toast(dbErr ?? err.message)
   } else {
     return toast("Something went wrong, please try again later.")
   }
@@ -158,4 +174,61 @@ export const formatter = new Intl.NumberFormat("en-US", {
 
 export const nanToNull = (value: any) => {
   return value && value !== "" ? parseInt(value) : 0
+}
+
+export function isFormDirty(obj: Record<string, any>): boolean {
+  return Object.keys(obj).length > 0
+}
+
+/**
+ *
+ * @param newImg image mapped from form
+ * @param oldImg image fetched
+ * @returns
+ */
+export function isImageDirty(image: unknown) {
+  const newImg = isArrayOfFile(image) ? image[0] : null
+  return newImg ? newImg.size !== 0 : false
+}
+
+/**
+ *
+ * @param fileImg raw image file from form
+ * @param startUpload method from uploadthing client
+ * @returns
+ */
+export async function getImageToCreate(
+  fileImg: unknown,
+  startUpload: (
+    files: File[],
+    input?: undefined
+  ) => Promise<UploadFileResponse[] | undefined>
+) {
+  const images = isArrayOfFile(fileImg)
+    ? await startUpload(fileImg).then((res) => {
+        const formattedImages = res?.map((image) => ({
+          id: image.key,
+          name: image.key.split("_")[1] ?? image.key,
+          url: image.url,
+        }))
+        return formattedImages ? formattedImages[0] : null
+      })
+    : null
+
+  return images
+}
+
+export function getImageToPreview(image?: StoredFile | null) {
+  if (!image) {
+    return null
+  }
+
+  const file = new File([], image.name, {
+    type: "image",
+  })
+  const fileWithPreview = Object.assign(file, {
+    preview: image.url,
+  })
+
+  return fileWithPreview
 }

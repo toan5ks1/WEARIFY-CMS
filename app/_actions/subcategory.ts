@@ -3,30 +3,38 @@
 import { revalidatePath } from "next/cache"
 import { db } from "@/db"
 import { sides, subcategories } from "@/db/schema"
-import { StoredFile } from "@/types"
-import { and, eq, not, or } from "drizzle-orm"
-import { type z } from "zod"
+import { InputSubcategory, InputUpdateSubcategory, StoredFile } from "@/types"
+import { and, eq, not } from "drizzle-orm"
 
-import type { subcategorySchema } from "@/lib/validations/subcategory"
-
-export async function checkSubcategoryAction(input: {
+export async function checkAddSubcategoryAction(input: {
   title: string
   categoryId: number
-  id?: number
 }) {
   const subcategoryWithSameName = await db.query.subcategories.findFirst({
-    where: input.id
-      ? and(
-          not(eq(subcategories.id, input.id)),
-          and(
-            eq(subcategories.categoryId, input.categoryId),
-            eq(subcategories.title, input.title)
-          )
-        )
-      : and(
-          eq(subcategories.categoryId, input.categoryId),
-          eq(subcategories.title, input.title)
-        ),
+    where: and(
+      eq(subcategories.categoryId, input.categoryId),
+      eq(subcategories.title, input.title)
+    ),
+  })
+
+  if (subcategoryWithSameName) {
+    throw new Error("Subcategory name already taken.")
+  }
+}
+
+export async function checkUpdateSubcategoryAction(input: {
+  title: string
+  categoryId: number
+  id: number
+}) {
+  const subcategoryWithSameName = await db.query.subcategories.findFirst({
+    where: and(
+      and(
+        eq(subcategories.categoryId, input.categoryId),
+        eq(subcategories.title, input.title)
+      ),
+      not(eq(subcategories.id, input.id))
+    ),
   })
 
   if (subcategoryWithSameName) {
@@ -35,7 +43,7 @@ export async function checkSubcategoryAction(input: {
 }
 
 export async function addSubcategoryAction(
-  input: Omit<z.infer<typeof subcategorySchema>, "sides"> & {
+  input: Omit<InputSubcategory, "sides"> & {
     categoryId: number
     images: StoredFile | null
   }
@@ -47,40 +55,36 @@ export async function addSubcategoryAction(
   return result.insertId
 }
 
-// export async function updateCategoryAction(
-//   input: z.infer<typeof categorySchema> & {
-//     id: number;
-//   }
-// ) {
-//   const category = await db.query.categories.findMany({
-//     where: or(eq(categories.id, input.id), eq(categories.title, input.title)),
-//   });
+export async function getSubcategoryAction(id: number) {
+  return await db.query.subcategories.findFirst({
+    where: eq(subcategories.id, id),
+    with: {
+      sides: true,
+    },
+  })
+}
 
-//   let msg;
-//   switch(category.length){
-//     case 0:
-//       msg = "Category not found"
-//       break;
-//     case 1:
-//       if(category[0].id !== input.id) {
-//         msg = "Category not found"
-//       }
-//       break;
-//     case 2:
-//       msg = "Category name already taken"
-//       break;
-//     default:
-//       break;
-//   }
+export async function updateSubcategoryAction(
+  input: Omit<InputUpdateSubcategory, "sides"> & {
+    categoryId: number
+    images: StoredFile | null
+  }
+) {
+  const subcategory = await db.query.subcategories.findFirst({
+    where: eq(subcategories.id, input.id),
+  })
 
-//   if (msg) {
-//     throw new Error(msg)
-//   }
+  if (!subcategory) {
+    throw new Error("Subcategory not found!")
+  }
 
-//   await db.update(categories).set(input).where(eq(categories.id, input.id));
+  await db
+    .update(subcategories)
+    .set(input)
+    .where(eq(subcategories.id, input.id))
 
-//   revalidatePath("/categories");
-// }
+  revalidatePath(`/categories/${input.categoryId}`)
+}
 
 export async function deleteSubcategoryAction({
   id,

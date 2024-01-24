@@ -2,18 +2,21 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { FileWithPreview, Side, StoredFile } from "@/types"
+import {
+  FileWithPreview,
+  InputSideWrapper,
+  InputSubcategory,
+  Side,
+} from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { generateReactHelpers } from "@uploadthing/react/hooks"
 import { Plus } from "lucide-react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { toast } from "sonner"
-import { type z } from "zod"
 
 import { defaultSide } from "@/lib/const"
-import { catchError, isArrayOfFile, slugify } from "@/lib/utils"
-import { subcategorySchema } from "@/lib/validations/subcategory"
+import { catchError, getImageToCreate, slugify } from "@/lib/utils"
+import { sideSchema, subcategorySchema } from "@/lib/validations/subcategory"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -33,21 +36,17 @@ import {
   UncontrolledFormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { Textarea } from "@/components/ui/textarea"
 import { FileDialog } from "@/components/file-dialog"
 import { Icons } from "@/components/icons"
-import { addSideAction } from "@/app/_actions/side"
+import { addSideAction, revSubcategory } from "@/app/_actions/side"
 import {
   addSubcategoryAction,
-  checkSubcategoryAction,
+  checkAddSubcategoryAction,
 } from "@/app/_actions/subcategory"
 import type { OurFileRouter } from "@/app/api/uploadthing/core"
 
-import { SubcategoryColumn } from "./columns"
 import PrintSide from "./print-side"
-
-export type Inputs = z.infer<typeof subcategorySchema>
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>()
 
@@ -63,13 +62,17 @@ export function AddSubcategoryDialog({
 
   const { isUploading, startUpload } = useUploadThing("productImage")
 
-  const form = useForm<Inputs>({
+  const subcategoryForm = useForm<InputSubcategory>({
     resolver: zodResolver(subcategorySchema),
     defaultValues: {
       title: "",
       description: "",
-      sides: [defaultSide],
     },
+  })
+
+  const sideForm = useForm<InputSideWrapper>({
+    resolver: zodResolver(sideSchema),
+    defaultValues: { sides: [defaultSide] },
   })
 
   function addSide() {
@@ -78,27 +81,18 @@ export function AddSubcategoryDialog({
 
   const { fields, append } = useFieldArray({
     name: "sides",
-    control: form.control,
+    control: sideForm.control,
   })
 
-  function onSubmit({ sides, ...data }: Inputs) {
+  function onSubmit(data: InputSubcategory) {
     startTransition(async () => {
       try {
-        await checkSubcategoryAction({
+        await checkAddSubcategoryAction({
           title: data.title,
           categoryId,
         })
 
-        const images = isArrayOfFile(data.images)
-          ? await startUpload(data.images).then((res) => {
-              const formattedImages = res?.map((image) => ({
-                id: image.key,
-                name: image.key.split("_")[1] ?? image.key,
-                url: image.url,
-              }))
-              return formattedImages ? formattedImages[0] : null
-            })
-          : null
+        const images = await getImageToCreate(data.images, startUpload)
 
         const subcategoryId = await addSubcategoryAction({
           ...data,
@@ -107,48 +101,31 @@ export function AddSubcategoryDialog({
           slug: slugify(data.title),
         })
 
-        const sidesMapped = sides?.length
-          ? ((await Promise.all(
-              sides.map(async (side) => {
-                const mockup = isArrayOfFile(side.mockup)
-                  ? await startUpload(side.mockup).then((res) => {
-                      const formattedImages = res?.map((image) => ({
-                        id: image.key,
-                        name: image.key.split("_")[1] ?? image.key,
-                        url: image.url,
-                      }))
+        const { sides } = sideForm.getValues()
 
-                      return formattedImages ? formattedImages[0] : null
-                    })
-                  : null
+        const sidesMapped = (await Promise.all(
+          sides.map(async (side) => {
+            const mockup = await getImageToCreate(side.mockup, startUpload)
+            const areaImage = await getImageToCreate(
+              side.areaImage,
+              startUpload
+            )
 
-                const areaImage = isArrayOfFile(side.areaImage)
-                  ? await startUpload(side.areaImage).then((res) => {
-                      const formattedImages = res?.map((image) => ({
-                        id: image.key,
-                        name: image.key.split("_")[1] ?? image.key,
-                        url: image.url,
-                      }))
+            side.subcategoryId = Number(subcategoryId)
+            side.mockup = mockup
+            side.areaImage = areaImage
 
-                      return formattedImages ? formattedImages[0] : null
-                    })
-                  : null
+            return side
+          })
+        )) as Side[]
 
-                side.subcategoryId = Number(subcategoryId)
-                side.mockup = mockup
-                side.areaImage = areaImage
+        sidesMapped.length && (await addSideAction(sidesMapped))
 
-                return side
-              })
-            )) as Side[])
-          : null
-
-        sidesMapped && (await addSideAction(sidesMapped))
-
-        toast.success("Subcategory added successfully.")
-
-        form.reset()
         setFiles(null)
+        sideForm.reset()
+        subcategoryForm.reset()
+        revSubcategory(categoryId)
+        toast.success("Subcategory added successfully.")
       } catch (err) {
         catchError(err)
       }
@@ -164,15 +141,17 @@ export function AddSubcategoryDialog({
       </DialogTrigger>
       <DialogContent className="scrollbar-hidden no-scrollbar flex max-h-screen flex-col gap-4 overflow-y-scroll sm:max-w-2xl lg:h-[80dvh]">
         <DialogHeader>
-          <DialogTitle>Add subcategory</DialogTitle>
+          <DialogTitle>Subcategory</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
+        <Form {...subcategoryForm}>
           <form
             className="grid w-full gap-5 px-1"
-            onSubmit={(...args) => void form.handleSubmit(onSubmit)(...args)}
+            onSubmit={(...args) =>
+              void subcategoryForm.handleSubmit(onSubmit)(...args)
+            }
           >
             <FormField
-              control={form.control}
+              control={subcategoryForm.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
@@ -188,7 +167,7 @@ export function AddSubcategoryDialog({
               )}
             />
             <FormField
-              control={form.control}
+              control={subcategoryForm.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -216,7 +195,7 @@ export function AddSubcategoryDialog({
               ) : null}
               <FormControl>
                 <FileDialog
-                  setValue={form.setValue}
+                  setValue={subcategoryForm.setValue}
                   name="images"
                   maxFiles={1}
                   maxSize={1024 * 1024 * 4}
@@ -227,7 +206,7 @@ export function AddSubcategoryDialog({
                 />
               </FormControl>
               <UncontrolledFormMessage
-                message={form.formState.errors.images?.message}
+                message={subcategoryForm.formState.errors.images?.message}
               />
             </FormItem>
             <FormLabel className="font-semibold">Print sides</FormLabel>
@@ -236,7 +215,7 @@ export function AddSubcategoryDialog({
                 <PrintSide
                   key={index}
                   index={index}
-                  form={form}
+                  form={sideForm}
                   isPending={isPending}
                   isUploading={isUploading}
                 />

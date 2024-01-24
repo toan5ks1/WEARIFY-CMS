@@ -2,11 +2,11 @@
 
 import React from "react"
 import Image from "next/image"
-import { FileWithPreview } from "@/types"
+import { FileWithPreview, InputSideWrapper, StoredFile } from "@/types"
 import { type UseFormReturn } from "react-hook-form"
 
 import { AreaType } from "@/lib/const"
-import { nanToNull, toTitleCase } from "@/lib/utils"
+import { getImageToPreview, nanToNull, toTitleCase } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   FormControl,
@@ -31,10 +31,8 @@ import {
 } from "@/components/ui/select"
 import { FileDialog } from "@/components/file-dialog"
 
-import { Inputs } from "./add-subcategory-dialog"
-
 interface PrintSideProps {
-  form: UseFormReturn<Inputs, any, undefined>
+  form: UseFormReturn<InputSideWrapper, any, undefined>
   isUploading: boolean
   isPending: boolean
   index: number
@@ -57,6 +55,19 @@ export default function PrintSide({
     : AreaType[0]
 
   const [areaType, setAreaType] = React.useState<string>(areaTypeDefault)
+
+  React.useEffect(() => {
+    const side = form.formState.defaultValues?.sides?.at(index)
+
+    if (side) {
+      const previewMockup = getImageToPreview(side.mockup as StoredFile)
+      const previewAreaImage = getImageToPreview(side.areaImage as StoredFile)
+
+      previewMockup && setSideMockups([previewMockup])
+      previewAreaImage && setPrintAreas([previewAreaImage])
+    }
+  }, [])
+
   function changeAreaType(
     onChange: (
       event: "image" | "dimension" | React.ChangeEvent<Element>

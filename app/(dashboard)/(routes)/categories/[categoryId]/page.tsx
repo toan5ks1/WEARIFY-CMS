@@ -1,6 +1,5 @@
-import { notFound } from "next/navigation"
 import { db } from "@/db"
-import { categories, subcategories } from "@/db/schema"
+import { subcategories } from "@/db/schema"
 import { eq } from "drizzle-orm"
 
 import { ApiList } from "@/components/ui/api-list"
@@ -9,18 +8,11 @@ import { Heading } from "@/components/ui/heading"
 import { Separator } from "@/components/ui/separator"
 
 import { AddSubcategoryDialog } from "./components/add-subcategory-dialog"
-import { UpdateCategoryForm } from "./components/category-form"
 import { columns } from "./components/columns"
 
 const CategoryPage = async ({ params }: { params: { categoryId: string } }) => {
   const categoryId = Number(params.categoryId)
-  const category = await db.query.categories.findFirst({
-    where: eq(categories.id, categoryId),
-  })
 
-  if (!category) {
-    notFound()
-  }
   const allSubcategory = await db.query.subcategories.findMany({
     where: eq(subcategories.categoryId, categoryId),
     columns: {
@@ -47,8 +39,6 @@ const CategoryPage = async ({ params }: { params: { categoryId: string } }) => {
         </div>
         <Separator />
         <DataTable searchKey="title" columns={columns} data={allSubcategory} />
-        <UpdateCategoryForm category={category} />
-        <Separator />
         <Heading title="API" description="API Calls for Categories" />
         <Separator />
         <ApiList entityName="categories" entityIdName="categoryId" />
